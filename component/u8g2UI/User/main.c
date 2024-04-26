@@ -5,9 +5,19 @@
 #include "bsp_usart.h"
 #include "bsp_motor.h"
 
+#include "u8g2.h"
+#include "oled.h"
+
 
 
 void Delay(uint32_t count);
+void draw(u8g2_t *u8g2);
+
+
+
+
+
+
 
 
 int main(void){
@@ -20,21 +30,14 @@ int main(void){
   USART_Config();
 	// 初始化电机
 	Motor_Config();
+
+  U8g2Init();
+	
 	
 	while(1){
-		Usart_SendString( DEBUG_USARTx,"这是一个串口中断接收回显实验\n");
-		// LED_G(OFF);
-		// Delay(0xFFFFFF);
-		// Usart_SendString( DEBUG_USARTx,"这是一个串口中断接收回显实验\n");
-	  // LED_G(ON);
 		
 		
-		//Delay_s(1);
-		
-
-		MotorGo(1000, 3000);
-		
-		Delay_s(1);
 	}
 }
+
 
