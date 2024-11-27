@@ -76,3 +76,14 @@ void	UART_config(void)
 	USART_Configuration(USART1, &COMx_InitStructure);		//初始化串口1 USART1,USART2
 	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1发送一个字符串
 }
+
+
+
+
+
+
+
+
+
+
+
