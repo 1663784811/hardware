@@ -3,28 +3,28 @@
 #include	"delay.h"
 
 
-/*************	¹¦ÄÜËµÃ÷	**************
-Ë«´®¿ÚÈ«Ë«¹¤ÖÐ¶Ï·½Ê½ÊÕ·¢Í¨Ñ¶³ÌÐò¡£
-Í¨¹ýPCÏòMCU·¢ËÍÊý¾Ý, MCUÊÕµ½ºóÍ¨¹ý´®¿Ú°ÑÊÕµ½µÄÊý¾ÝÔ­Ñù·µ»Ø.
+/*************	ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½	**************
+Ë«ï¿½ï¿½ï¿½ï¿½È«Ë«ï¿½ï¿½ï¿½Ð¶Ï·ï¿½Ê½ï¿½Õ·ï¿½Í¨Ñ¶ï¿½ï¿½ï¿½ï¿½
+Í¨ï¿½ï¿½PCï¿½ï¿½MCUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, MCUï¿½Õµï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 
 ******************************************/
 
 
 
-/*************	±¾µØ³£Á¿ÉùÃ÷	**************/
+/*************	ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	**************/
 
 
-/*************	±¾µØ±äÁ¿ÉùÃ÷	**************/
+/*************	ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	**************/
 
 
-/*************	±¾µØº¯ÊýÉùÃ÷	**************/
-//´®¿Ú1³õÊ¼»¯º¯Êý
+/*************	ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	**************/
+//ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void	UART_config(void);
 
 
 
 
-/*************  Íâ²¿º¯ÊýºÍ±äÁ¿ÉùÃ÷ *****************/
+/*************  ï¿½â²¿ï¿½ï¿½ï¿½ï¿½ï¿½Í±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ *****************/
 
 
 
@@ -32,25 +32,14 @@ void	UART_config(void);
 /**********************************************/
 void main(void)
 {
-	u8	i;
 
 	UART_config();
-	EA = 1;
+	EA = 1;  // ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
 
 	while (1)
 	{
-		delay_ms(1);
-		if(COM1.RX_TimeOut > 0)		//³¬Ê±¼ÆÊý
-		{
-			if(--COM1.RX_TimeOut == 0)
-			{
-				if(COM1.RX_Cnt > 0)
-				{
-					for(i=0; i<COM1.RX_Cnt; i++)	TX1_write2buff(RX1_Buffer[i]);	//ÊÕµ½µÄÊý¾ÝÔ­Ñù·µ»Ø
-				}
-				COM1.RX_Cnt = 0;
-			}
-		}
+		delay_ms(1000);
+	  PrintString1("S");
 	}
 }
 
@@ -60,21 +49,21 @@ void main(void)
 
 
 
-/** ´®¿Ú1³õÊ¼»¯º¯Êý******/
+/** ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½******/
 void	UART_config(void)
 {
-	COMx_InitDefine		COMx_InitStructure;					//½á¹¹¶¨Òå
+	COMx_InitDefine		COMx_InitStructure;					//ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½
 	COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;		//Ä£Ê½,       UART_ShiftRight,UART_8bit_BRTx,UART_9bit,UART_9bit_BRTx
-	COMx_InitStructure.UART_BRT_Use   = BRT_Timer2;			//Ê¹ÓÃ²¨ÌØÂÊ,   BRT_Timer1, BRT_Timer2 (×¢Òâ: ´®¿Ú2¹Ì¶¨Ê¹ÓÃBRT_Timer2)
-	COMx_InitStructure.UART_BaudRate  = 115200ul;			//²¨ÌØÂÊ, Ò»°ã 110 ~ 115200
-	COMx_InitStructure.UART_RxEnable  = ENABLE;				//½ÓÊÕÔÊÐí,   ENABLE»òDISABLE
-	COMx_InitStructure.BaudRateDouble = DISABLE;			//²¨ÌØÂÊ¼Ó±¶, ENABLE»òDISABLE
-	COMx_InitStructure.UART_Interrupt = ENABLE;				//ÖÐ¶ÏÔÊÐí,   ENABLE»òDISABLE
-	COMx_InitStructure.UART_Polity    = PolityLow;			//ÖÐ¶ÏÓÅÏÈ¼¶, PolityLow,PolityHigh
-	COMx_InitStructure.UART_P_SW      = UART1_SW_P30_P31;	//ÇÐ»»¶Ë¿Ú,   UART1_SW_P30_P31,UART1_SW_P36_P37,UART1_SW_P16_P17(±ØÐëÊ¹ÓÃÄÚ²¿Ê±ÖÓ)
-	COMx_InitStructure.UART_RXD_TXD_Short = DISABLE;		//ÄÚ²¿¶ÌÂ·RXDÓëTXD, ×öÖÐ¼Ì, ENABLE,DISABLE
-	USART_Configuration(USART1, &COMx_InitStructure);		//³õÊ¼»¯´®¿Ú1 USART1,USART2
-	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1·¢ËÍÒ»¸ö×Ö·û´®
+	COMx_InitStructure.UART_BRT_Use   = BRT_Timer2;			//Ê¹ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½,   BRT_Timer1, BRT_Timer2 (×¢ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½2ï¿½Ì¶ï¿½Ê¹ï¿½ï¿½BRT_Timer2)
+	COMx_InitStructure.UART_BaudRate  = 115200ul;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Ò»ï¿½ï¿½ 110 ~ 115200
+	COMx_InitStructure.UART_RxEnable  = ENABLE;				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,   ENABLEï¿½ï¿½DISABLE
+	COMx_InitStructure.BaudRateDouble = DISABLE;			//ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ó±ï¿½, ENABLEï¿½ï¿½DISABLE
+	COMx_InitStructure.UART_Interrupt = ENABLE;				//ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½,   ENABLEï¿½ï¿½DISABLE
+	COMx_InitStructure.UART_Polity    = PolityLow;			//ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½È¼ï¿½, PolityLow,PolityHigh
+	COMx_InitStructure.UART_P_SW      = UART1_SW_P30_P31;	//ï¿½Ð»ï¿½ï¿½Ë¿ï¿½,   UART1_SW_P30_P31,UART1_SW_P36_P37,UART1_SW_P16_P17(ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½Ú²ï¿½Ê±ï¿½ï¿½)
+	COMx_InitStructure.UART_RXD_TXD_Short = DISABLE;		//ï¿½Ú²ï¿½ï¿½ï¿½Â·RXDï¿½ï¿½TXD, ï¿½ï¿½ï¿½Ð¼ï¿½, ENABLE,DISABLE
+	USART_Configuration(USART1, &COMx_InitStructure);		//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1 USART1,USART2
+	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 }
 
 
