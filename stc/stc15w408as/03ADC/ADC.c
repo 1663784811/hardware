@@ -76,27 +76,25 @@ u16	Get_ADC10bitResult(u8 channel)	//channel = 0~7
 
 	ADC_CONTR = (ADC_CONTR & 0xe0) | ADC_START | channel; 
 	NOP(4);			//对ADC_CONTR操作后要4T之后才能访问
-  PrintString("===");
-	PrintString(ADC_CONTR);
 	for(i=0; i<250; i++)		//超时
 	{
-		if(ADC_CONTR & ADC_FLAG)
-		{
+		if(ADC_CONTR & ADC_FLAG){
 			
 			ADC_CONTR &= ~ADC_FLAG;
-			if(PCON2 &  (1<<5))		//10位AD结果的高2位放ADC_RES的低2位，低8位在ADC_RESL。
-			{
+			
+			if(PCON2 &  (1<<5)){
+				//10位AD结果的高2位放ADC_RES的低2位，低8位在ADC_RESL。
 				adc = (u16)(ADC_RES & 3);
 				adc = (adc << 8) | ADC_RESL;
-			}
-			else		//10位AD结果的高8位放ADC_RES，低2位在ADC_RESL的低2位。
-			{
+			} else {
+				//10位AD结果的高8位放ADC_RES，低2位在ADC_RESL的低2位。
 				adc = (u16)ADC_RES;
 				adc = (adc << 2) | (ADC_RESL & 3);
 			}
 			return	adc;
 		}
 	}
+	PrintString(ADC_CONTR+'0');
 	return	1024;	//错误,返回1024,调用的程序判断
 }
 

@@ -30,6 +30,7 @@ void	Timer_config(void);
 void	GPIO_config(void);
 void ZeroCrossDetected(void);
 void Commutation(void);
+void startMotor(void);
 /*************  外部函数和变量声明 *****************/
 
 
@@ -51,7 +52,8 @@ void main(void)
 	{
 		if(isRun){
 			// 判断占空比大于5
-			if(){
+			
+			if(0){
 				// 过零检测,转向
 				
 				ZeroCrossDetected();		
@@ -80,10 +82,10 @@ void inputPwm(void){
 void startMotor(void){
 	while(1){
 		// 判断占空比大于5
-    if(){
+    if(0){
 
 			  // 判断是否读取到过零检测
-			  if(){
+			  if(0){
 					// 转到正常运行
 					isRun = 1;
 				}else{
@@ -132,7 +134,7 @@ void ZeroCrossDetected(void) {
     //Delay(换相延迟时间);
     //Commutation();
 	  // 判断哪个相位是空的
-	  if(){
+	  if(0){
 			
 			
 		}
@@ -144,22 +146,22 @@ void ZeroCrossDetected(void) {
 void Commutation(void) {
     switch (current_step) {
       case 1: 
-				Drive(U, V);
+				//Drive(U, V);
 				break;
       case 2: 
-				Drive(V, W); 
+				//Drive(V, W); 
 				break;
       case 3: 
-				Drive(W, U); 
+				//Drive(W, U); 
 				break;
       case 4: 
-				Drive(U, W); 
+				//Drive(U, W); 
 				break;
       case 5: 
-				Drive(W, V); 
+				//Drive(W, V); 
 				break;
       case 6: 
-				Drive(V, U); 
+				//Drive(V, U); 
 				break;
     }
 		current_step += 1;
