@@ -44,8 +44,7 @@ void main(void)
 	UART_config();
 	EA = 1;             // 允许中断
 
-	//PrintString1("motor start");
-	
+	PrintString1("motor start");
 	// ==========================================
 	
 	while (1)
@@ -82,6 +81,7 @@ void inputPwm(void){
 void startMotor(void){
 	while(1){
 		// 判断占空比大于5
+		
     if(0){
 
 			  // 判断是否读取到过零检测
@@ -91,7 +91,7 @@ void startMotor(void){
 				}else{
 					// 继续加速
 				  Commutation();
-				  delay(20);
+				  delay_ms(20);
 				}
 		}else{
 			// 停止
@@ -138,7 +138,7 @@ void ZeroCrossDetected(void) {
 			
 			
 		}
-		return 0;
+		//return 0;
 }
 
 
