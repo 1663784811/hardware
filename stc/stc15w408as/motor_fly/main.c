@@ -3,7 +3,7 @@
 #include  "timer.h"
 #include	"USART1.h"
 #include	"delay.h"
-
+#include  "Exti.h"
 
 /*************	功能说明	**************
 双串口全双工中断方式收发通讯程序。
@@ -15,36 +15,51 @@
 
 /*************	本地常量声明	**************/
 
-
 /*************	本地变量声明	**************/
 // 相位状态
-char current_step = 1;
+volatile char current_step = 1;
 // 是否正常运行状态
-char isRun = 0;
+volatile char isRun = 0;
+
+// 运行条件  pwmSpeed 大于 runCondition 时开始运行
+volatile u16 runCondition = 10;
+
+
+// 当前速度
+volatile u16 nowSpeed = 0;
+// 当前pwm 速度引脚
+//unsigned char *runPin = null;
+// 运行速度（ 高电平大小 ）
+volatile u16 pwmSpeed = 0;
+// 速度周期 （ 总电平周期 ）
+volatile u16 pwmCycle = 65535;
+
+
 
 
 /*************	本地函数声明	**************/
+void	EXTI_config(void);
 //串口1初始化函数
-void	UART_config(void);
-void	Timer_config(void);
-void	GPIO_config(void);
+void UART_config(void);
+void Timer_config(void);
+void GPIO_config(void);
 void ZeroCrossDetected(void);
 void Commutation(void);
 void startMotor(void);
-/*************  外部函数和变量声明 *****************/
 
+/*************  外部函数和变量声明 *****************/
 
 
 
 /**********************************************/
 void main(void)
 {
+	EXTI_config();
 	GPIO_config();      // gpio 配置
 	Timer_config();     // 定时器配置
 	UART_config();
 	EA = 1;             // 允许中断
 
-	PrintString1("motor start");
 	// ==========================================
 	
 	while (1)
@@ -81,13 +96,15 @@ void inputPwm(void){
 void startMotor(void){
 	while(1){
 		// 判断占空比大于5
-		
-    if(0){
-
+    if(runCondition < pwmSpeed){
 			  // 判断是否读取到过零检测
+			
+			
 			  if(0){
 					// 转到正常运行
 					isRun = 1;
+					
+					
 				}else{
 					// 继续加速
 				  Commutation();
@@ -98,29 +115,18 @@ void startMotor(void){
 			break;
 		}
 	}
-
 }
 
 
 /**
 *   通过定时器输入捕获功能来检测 PWM 信号
 */
-void External0_ISR(void) interrupt 0 {
-    if (measuring_high) {
-        TR0 = 0;  // 停止定时器
-        high_time = (TH0 << 8) | TL0;  // 读取高电平时间
-        TH0 = 0x00;
-        TL0 = 0x00;
-        IT0 = 0;  // 切换为下降沿触发
-    } else {
-        TR0 = 0;  // 停止定时器
-        period_time = (TH0 << 8) | TL0;  // 读取周期时间
-        TH0 = 0x00;
-        TL0 = 0x00;
-        IT0 = 1;  // 切换为上升沿触发
-    }
-    TR0 = 1;  // 重新启动定时器
-    measuring_high = !measuring_high;
+void External0_ISR(void) interrupt INT0_VECTOR {
+//    if (measuring_high) {
+//        IT0 = 0;  // 切换为下降沿触发
+//    } else {
+//        IT0 = 1;  // 切换为上升沿触发
+//    }
 }
 
 
@@ -176,7 +182,20 @@ void Commutation(void) {
 /********************* Timer0中断函数   ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-  
+	nowSpeed++;
+	if( nowSpeed < pwmSpeed ){
+		// 电平拉高
+	  
+	} else {
+		// 电平拉低
+		
+		
+
+	}
+	//== 重置周期
+	if(nowSpeed >= pwmCycle){
+		 nowSpeed  = 0;
+	}
 }
 
 /********************* Timer1中断函数  产生pwm波 ********************/
@@ -195,12 +214,26 @@ void timer2_int (void) interrupt TIMER2_VECTOR
 
 
 
+/************************************     初始化     ***************************************/
+/************************************     初始化     ***************************************/
+/************************************     初始化     ***************************************/
+/************************************     初始化     ***************************************/
+/************************************     初始化     ***************************************/
+/************************************     初始化     ***************************************/
+/******     pwm     ******/
+void	EXTI_config(void)
+{
+	EXTI_InitTypeDef	EXTI_InitStructure;					//结构定义
+
+	EXTI_InitStructure.EXTI_Mode      = EXT_MODE_RiseFall;	//中断模式,  	EXT_MODE_RiseFall, EXT_MODE_Fall
+	EXTI_InitStructure.EXTI_Polity    = PolityHigh;			//中断优先级,   PolityLow,PolityHigh
+	EXTI_InitStructure.EXTI_Interrupt = ENABLE;				//中断允许,     ENABLE或DISABLE
+	Ext_Inilize(EXT_INT0,&EXTI_InitStructure);				//初始化INT0	EXT_INT0,EXT_INT1,EXT_INT2,EXT_INT3,EXT_INT4
+}
 
 
 
-
-
-/************************************     串口1初始化函数     ***************************************/
+/******     串口1初始化函数     ******/
 void	UART_config(void)
 {
 	COMx_InitDefine		COMx_InitStructure;					//结构定义
@@ -217,7 +250,7 @@ void	UART_config(void)
 	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1发送一个字符串
 }
 
-/************************************       IO口配置       *****************************************/
+/******     IO口配置     **********/
 void	GPIO_config(void)
 {
 	GPIO_InitTypeDef	GPIO_InitStructure;				//结构定义
@@ -235,13 +268,13 @@ void	GPIO_config(void)
 }
 
 
-/*************************************        定时器配置      **************************************/
+/********       定时器配置  ***************/
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
 	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
-	TIM_InitStructure.TIM_Interrupt = DISABLE;				//中断是否允许,   ENABLE或DISABLE
+	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
 	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / 100000UL);		//初值,

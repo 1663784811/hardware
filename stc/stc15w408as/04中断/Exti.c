@@ -9,35 +9,35 @@
 #include	"Exti.h"
 
 
-/********************* INT0中断函数 *************************/
-void Ext_INT0 (void) interrupt INT0_VECTOR		//进中断时已经清除标志
-{
-	
-}
+///********************* INT0中断函数 *************************/
+//void Ext_INT0 (void) interrupt INT0_VECTOR		//进中断时已经清除标志
+//{
+//	
+//}
 
-/********************* INT1中断函数 *************************/
-void Ext_INT1 (void) interrupt INT1_VECTOR		//进中断时已经清除标志
-{
-	
-}
+///********************* INT1中断函数 *************************/
+//void Ext_INT1 (void) interrupt INT1_VECTOR		//进中断时已经清除标志
+//{
+//	
+//}
 
-/********************* INT2中断函数 *************************/
-void Ext_INT2 (void) interrupt INT2_VECTOR	//
-{
-	
-}
+///********************* INT2中断函数 *************************/
+//void Ext_INT2 (void) interrupt INT2_VECTOR	//
+//{
+//	
+//}
 
-/********************* INT3中断函数 *************************/
-void Ext_INT3 (void) interrupt INT3_VECTOR
-{
-	
-}
+///********************* INT3中断函数 *************************/
+//void Ext_INT3 (void) interrupt INT3_VECTOR
+//{
+//	
+//}
 
-/********************* INT4中断函数 *************************/
-void Ext_INT4 (void) interrupt INT4_VECTOR
-{
-	
-}
+///********************* INT4中断函数 *************************/
+//void Ext_INT4 (void) interrupt INT4_VECTOR
+//{
+//	
+//}
 
 //========================================================================
 // 函数: u8	Ext_Inilize(u8 EXT, EXTI_InitTypeDef *INTx)

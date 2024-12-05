@@ -1,4 +1,5 @@
 #include	"config.h"
+#include  "Exti.h"
 #include	"USART1.h"
 #include	"delay.h"
 
@@ -16,7 +17,9 @@
 /*************	本地变量声明	**************/
 
 
+
 /*************	本地函数声明	**************/
+void	EXTI_config(void);
 //串口1初始化函数
 void	UART_config(void);
 
@@ -27,6 +30,7 @@ void	UART_config(void);
 /**********************************************/
 void main(void)
 {
+	EXTI_config();
 	UART_config();
 	EA = 1;             // 允许中断
 	PrintString1("init success");
@@ -44,16 +48,15 @@ void main(void)
 *   通过定时器输入捕获功能来检测 PWM 信号
 */
 void External0_ISR(void) interrupt 0 {
-    if (0) {
-        //high_time = (TH0 << 8) | TL0;  // 读取高电平时间
-        TH0 = 0x00;
-        TL0 = 0x00;
-        IT0 = 0;  // 切换为下降沿触发
+		PrintString1("===");	
+    if (IT0) {
+			PrintString1("up");
+			// 切换为下降沿触发
+			IT0 = 0;
     } else {
-        //period_time = (TH0 << 8) | TL0;  // 读取周期时间
-        TH0 = 0x00;
-        TL0 = 0x00;
-        IT0 = 1;  // 切换为上升沿触发
+			PrintString1("down");			
+			// 切换为上升沿触发
+			IT0 = 1;
     }
 }
 
@@ -79,6 +82,21 @@ void	UART_config(void)
 	USART_Configuration(USART1, &COMx_InitStructure);		//初始化串口1 USART1,USART2
 	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1发送一个字符串
 }
+
+
+/*************  外部函数和变量声明 *****************/
+
+void	EXTI_config(void)
+{
+	EXTI_InitTypeDef	EXTI_InitStructure;					//结构定义
+
+	EXTI_InitStructure.EXTI_Mode      = EXT_MODE_RiseFall;	//中断模式,  	EXT_MODE_RiseFall, EXT_MODE_Fall
+	EXTI_InitStructure.EXTI_Polity    = PolityHigh;			//中断优先级,   PolityLow,PolityHigh
+	EXTI_InitStructure.EXTI_Interrupt = ENABLE;				//中断允许,     ENABLE或DISABLE
+	Ext_Inilize(EXT_INT0,&EXTI_InitStructure);				//初始化INT0	EXT_INT0,EXT_INT1,EXT_INT2,EXT_INT3,EXT_INT4
+}
+
+
 
 
 
