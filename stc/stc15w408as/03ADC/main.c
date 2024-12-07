@@ -27,12 +27,12 @@
 void	ADC_config(void)
 {
 	ADC_InitTypeDef		ADC_InitStructure;				                    //结构定义
-	ADC_InitStructure.ADC_Px        = ADC_P10 | ADC_P11 | ADC_P12;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
+	ADC_InitStructure.ADC_Px        = ADC_P10 | ADC_P11;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
 	ADC_InitStructure.ADC_Speed     = ADC_360T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
 	ADC_InitStructure.ADC_Power     = ENABLE;			                  //ADC功率允许/关闭	ENABLE,DISABLE
 	ADC_InitStructure.ADC_AdjResult = ADC_RES_H8L2;		              //ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2
 	ADC_InitStructure.ADC_Polity    = PolityLow;		                //优先级设置	PolityHigh,PolityLow
-	ADC_InitStructure.ADC_Interrupt = ENABLE;			                  //中断允许		ENABLE,DISABLE
+	ADC_InitStructure.ADC_Interrupt = DISABLE;			                  //中断允许		ENABLE,DISABLE
 	ADC_Inilize(&ADC_InitStructure);					                      //初始化
 	ADC_PowerControl(ENABLE);							                          //单独的ADC电源操作函数, ENABLE或DISABLE
 }
@@ -50,7 +50,7 @@ void main(void)
 	while (1)
 	{
 
-		for(i=0; i<3; i++)
+		for(i=0; i<2; i++)
 		{
 			delay_ms(250);
 		//	Get_ADC10bitResult(i);		//参数0~7,查询方式做一次ADC, 丢弃一次
@@ -66,9 +66,9 @@ void main(void)
 			TxSend(' ');
 			TxSend(' ');
 		}
-		delay_ms(1000);
-		PrintString("=============================");
-		delay_ms(1000);
+		delay_ms(2000);
+		PrintString("\r\n");
+		delay_ms(2000);
 	}
 }
 
