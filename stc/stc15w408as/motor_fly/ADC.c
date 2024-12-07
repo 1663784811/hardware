@@ -86,5 +86,3 @@ void ADC_int (void) interrupt ADC_VECTOR
 {
 	ADC_CONTR &= ~ADC_FLAG;
 }
-
-

@@ -38,15 +38,16 @@ volatile u16 pwmCycle = 65535;
 
 
 /*************	本地函数声明	**************/
-void	EXTI_config(void);
-//串口1初始化函数
-void UART_config(void);
+void EXTI_config(void);
+void UART_config(void);  //串口1初始化函数
 void Timer_config(void);
 void GPIO_config(void);
+
+// ====
 void ZeroCrossDetected(void);
 void Commutation(void);
 void startMotor(void);
-
+void inputPwm(void);
 /*************  外部函数和变量声明 *****************/
 
 
@@ -85,8 +86,9 @@ void main(void)
 /**
 * 计算占空比
 */
-void inputPwm(void){
-
+void inputPwm(void)
+{
+  PrintString1("inputPwm");
 
 }
 
