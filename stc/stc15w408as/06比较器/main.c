@@ -51,7 +51,7 @@ void	CMP_config(void)
 	CMP_InitStructure.CMP_OutptP12_En  = DISABLE;		//允许比较结果输出到P1.2,   ENABLE,DISABLE
 	CMP_InitStructure.CMP_InvCMPO      = DISABLE;		//比较器输出取反, 	ENABLE,DISABLE
 	CMP_InitStructure.CMP_100nsFilter  = ENABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
-	CMP_InitStructure.CMP_OutDelayDuty = 20;			//比较结果变化延时周期数, 0~63
+	CMP_InitStructure.CMP_OutDelayDuty = 0;			//比较结果变化延时周期数, 0~63
 //	CMP_InitStructure.CMP_Polity	   = PolityHigh;	//中断优先级,     PolityLow,PolityHigh
 	CMP_Inilize(&CMP_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
 
@@ -69,7 +69,7 @@ void main(void)
 	ADC_config();
 	adcRequest(ADC_P11);
 	
-	
+	EA = 1;
 	while (1)
 	{
 		delay_ms(2000);
