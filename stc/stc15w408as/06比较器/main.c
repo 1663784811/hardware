@@ -46,25 +46,21 @@ void	CMP_config(void)
 	CMP_InitStructure.CMP_EN = ENABLE;					//允许比较器		ENABLE,DISABLE
 	CMP_InitStructure.CMP_RiseInterruptEn = ENABLE;	//允许上升沿中断	ENABLE,DISABLE
 	CMP_InitStructure.CMP_FallInterruptEn = ENABLE;	//允许下降沿中断	ENABLE,DISABLE
-	CMP_InitStructure.CMP_P_Select     = CMP_P_ADCIS;		//比较器输入正极性选择, CMP_P_P55: 选择内部P5.5做正输入, CMP_P_ADCIS: 由ADCIS[2:0]所选择的ADC输入端做正输入.
+	CMP_InitStructure.CMP_P_Select     = CMP_P_P55;		//比较器输入正极性选择, CMP_P_P55: 选择内部P5.5做正输入, CMP_P_ADCIS: 由ADCIS[2:0]所选择的ADC输入端做正输入.
 	CMP_InitStructure.CMP_N_Select     = CMP_N_P54;		//比较器输入负极性选择, CMP_N_BGv: 选择内部BandGap电压BGv做负输入, CMP_N_P54: 选择外部P5.4做输入.
 	CMP_InitStructure.CMP_OutptP12_En  = DISABLE;		//允许比较结果输出到P1.2,   ENABLE,DISABLE
 	CMP_InitStructure.CMP_InvCMPO      = DISABLE;		//比较器输出取反, 	ENABLE,DISABLE
 	CMP_InitStructure.CMP_100nsFilter  = ENABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
-	CMP_InitStructure.CMP_OutDelayDuty = 0;			//比较结果变化延时周期数, 0~63
-//	CMP_InitStructure.CMP_Polity	   = PolityHigh;	//中断优先级,     PolityLow,PolityHigh
+	CMP_InitStructure.CMP_OutDelayDuty = 1;			//比较结果变化延时周期数, 0~63
+  CMP_InitStructure.CMP_Polity	   = PolityLow;	//中断优先级,     PolityLow,PolityHigh
 	CMP_Inilize(&CMP_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
-
-	CMPCR1 &= ~CMPIF;
-
 }
 
 
 /**********************************************/
 void main(void)
 {
-	u8	i;
-	u16	j;
+
 	
 	ADC_config();
 	adcRequest(ADC_P11);
@@ -73,7 +69,7 @@ void main(void)
 	while (1)
 	{
 		delay_ms(2000);
-		PrintString("test");
+		PrintString("test \r\n");
 	}
 }
 
