@@ -60,13 +60,10 @@ void main(void)
 {
 	GPIO_config();      // gpio 配置
 	EXTI_config();      
-
 	Timer_config();     // 定时器配置
 	UART_config();
 	EA = 1;             // 允许中断
-
 	// ==========================================
-	
 	while (1)
 	{
 		if(isRun){
@@ -190,7 +187,7 @@ void Commutation(void) {
 /************************************     中断     ***************************************/
 /************************************     中断     ***************************************/
 /************************************     中断     ***************************************/
-/********************* Timer0中断函数   ************************/
+/********************* Timer0中断函数  产生pwm波 ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
 	nowSpeed++;
@@ -205,14 +202,8 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 	}
 }
 
-/********************* Timer1中断函数  产生pwm波 ********************/
+/********************* Timer1中断函数  ********************/
 void timer1_int (void) interrupt TIMER1_VECTOR
-{
-
-}
-
-/********************* Timer2中断函数  ************************/
-void timer2_int (void) interrupt TIMER2_VECTOR
 {
 
 }
@@ -222,10 +213,9 @@ void timer2_int (void) interrupt TIMER2_VECTOR
 /********************* CMP 中断函数************************/
 void CMP_int (void) interrupt CMP_VECTOR
 {
-	P10 = ~P10;
-	delay_ms(500);
 	//清除中断标志
 	CMPCR1 &= ~CMPIF;
+	Commutation();
 }
 
 
@@ -248,7 +238,6 @@ void ADC_int (void) interrupt ADC_VECTOR
 void	EXTI_config(void)
 {
 	EXTI_InitTypeDef	EXTI_InitStructure;					//结构定义
-
 	EXTI_InitStructure.EXTI_Mode      = EXT_MODE_RiseFall;	//中断模式,  	EXT_MODE_RiseFall, EXT_MODE_Fall
 	EXTI_InitStructure.EXTI_Polity    = PolityHigh;			//中断优先级,   PolityLow,PolityHigh
 	EXTI_InitStructure.EXTI_Interrupt = ENABLE;				//中断允许,     ENABLE或DISABLE
@@ -314,12 +303,12 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer1,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
 
-	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE. (注意: Timer2固定为16位自动重装, 中断固定为低优先级)
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;		//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
-	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / (50*12));		//初值
-	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
-	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
+//	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE. (注意: Timer2固定为16位自动重装, 中断固定为低优先级)
+//	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;		//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+//	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
+//	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / (50*12));		//初值
+//	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
+//	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
 }
 
 /********       ADC  ***************/
