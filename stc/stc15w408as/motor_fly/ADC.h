@@ -1,4 +1,3 @@
-
 #ifndef	__ADC_H
 #define	__ADC_H
 
@@ -43,8 +42,12 @@ typedef struct
 	u8	ADC_Interrupt;	//中断允许		ENABLE,DISABLE
 } ADC_InitTypeDef;
 
+// 初始化ADC
 void	ADC_Inilize(ADC_InitTypeDef *ADCx);
+// 开启ADC
 void	ADC_PowerControl(u8 pwr);
-u16		Get_ADC10bitResult(u8 channel);	//channel = 0~7
 
+u16		Get_ADC10bitResult(u8 channel);	//channel = 0~7
+// ADC请求
+void adcRequest(u8 channel);
 #endif

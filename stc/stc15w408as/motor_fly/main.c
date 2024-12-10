@@ -4,6 +4,8 @@
 #include	"USART1.h"
 #include	"delay.h"
 #include  "Exti.h"
+#include  "ADC.h"
+#include  "compare.h"
 
 /*************	功能说明	**************
 双串口全双工中断方式收发通讯程序。
@@ -42,7 +44,8 @@ void EXTI_config(void);
 void UART_config(void);  //串口1初始化函数
 void Timer_config(void);
 void GPIO_config(void);
-
+void ADC_config(void);
+void CMP_config(void);
 // ====
 void ZeroCrossDetected(void);
 void Commutation(void);
@@ -55,8 +58,9 @@ void inputPwm(void);
 /**********************************************/
 void main(void)
 {
-	EXTI_config();
 	GPIO_config();      // gpio 配置
+	EXTI_config();      
+
 	Timer_config();     // 定时器配置
 	UART_config();
 	EA = 1;             // 允许中断
@@ -89,7 +93,6 @@ void main(void)
 void inputPwm(void)
 {
   PrintString1("inputPwm");
-
 }
 
 /**
@@ -143,8 +146,6 @@ void ZeroCrossDetected(void) {
     //Commutation();
 	  // 判断哪个相位是空的
 	  if(0){
-			
-			
 		}
 		//return 0;
 }
@@ -180,19 +181,23 @@ void Commutation(void) {
 
 
 
-
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
+/************************************     中断     ***************************************/
 /********************* Timer0中断函数   ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
 	nowSpeed++;
 	if( nowSpeed < pwmSpeed ){
 		// 电平拉高
-	  
 	} else {
 		// 电平拉低
-		
-		
-
 	}
 	//== 重置周期
 	if(nowSpeed >= pwmCycle){
@@ -203,8 +208,6 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 /********************* Timer1中断函数  产生pwm波 ********************/
 void timer1_int (void) interrupt TIMER1_VECTOR
 {
-	//
-	
 
 }
 
@@ -214,6 +217,25 @@ void timer2_int (void) interrupt TIMER2_VECTOR
 
 }
 
+
+
+/********************* CMP 中断函数************************/
+void CMP_int (void) interrupt CMP_VECTOR
+{
+	P10 = ~P10;
+	delay_ms(500);
+	//清除中断标志
+	CMPCR1 &= ~CMPIF;
+}
+
+
+/********************* 描述: ADC中断函数.************************/
+void ADC_int (void) interrupt ADC_VECTOR
+{
+	//清除标志
+	ADC_CONTR &= ~ADC_FLAG;
+	adcRequest(ADC_P14);
+}
 
 
 /************************************     初始化     ***************************************/
@@ -300,7 +322,35 @@ void	Timer_config(void)
 	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
 }
 
+/********       ADC  ***************/
+void	ADC_config(void)
+{
+	ADC_InitTypeDef		ADC_InitStructure;				                    //结构定义
+	ADC_InitStructure.ADC_Px        = ADC_P14;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
+	ADC_InitStructure.ADC_Speed     = ADC_360T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
+	ADC_InitStructure.ADC_Power     = ENABLE;			                  //ADC功率允许/关闭	ENABLE,DISABLE
+	ADC_InitStructure.ADC_AdjResult = ADC_RES_H8L2;		              //ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2
+	ADC_InitStructure.ADC_Polity    = PolityLow;		                //优先级设置	PolityHigh,PolityLow
+	ADC_InitStructure.ADC_Interrupt = ENABLE;			                  //中断允许		ENABLE,DISABLE
+	ADC_Inilize(&ADC_InitStructure);					                      //初始化
+	ADC_PowerControl(ENABLE);							                          //单独的ADC电源操作函数, ENABLE或DISABLE
+}
 
 
-
+/************************ 比较器配置 ****************************/
+void	CMP_config(void)
+{
+	CMP_InitDefine CMP_InitStructure;					//结构定义
+	CMP_InitStructure.CMP_EN = ENABLE;					//允许比较器		ENABLE,DISABLE
+	CMP_InitStructure.CMP_RiseInterruptEn = ENABLE;		//允许上升沿中断	ENABLE,DISABLE
+	CMP_InitStructure.CMP_FallInterruptEn = ENABLE;		//允许下降沿中断	ENABLE,DISABLE
+	CMP_InitStructure.CMP_P_Select     = CMP_P_ADCIS;		//比较器输入正极性选择, CMP_P_P55: 选择内部P5.5做正输入, CMP_P_ADCIS: 由ADCIS[2:0]所选择的ADC输入端做正输入.
+	CMP_InitStructure.CMP_N_Select     = CMP_N_P54;		//比较器输入负极性选择, CMP_N_BGv: 选择内部BandGap电压BGv做负输入, CMP_N_P54: 选择外部P5.4做输入.
+	CMP_InitStructure.CMP_OutptP12_En  = ENABLE;		//允许比较结果输出到P1.2,   ENABLE,DISABLE
+	CMP_InitStructure.CMP_InvCMPO      = ENABLE;		//比较器输出取反, 	ENABLE,DISABLE
+	CMP_InitStructure.CMP_100nsFilter  = DISABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
+	CMP_InitStructure.CMP_OutDelayDuty = 0;			//比较结果变化延时周期数, 0~63
+  CMP_InitStructure.CMP_Polity	   = PolityLow;	//中断优先级,     PolityLow,PolityHigh
+	CMP_Inilize(&CMP_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
+}
 

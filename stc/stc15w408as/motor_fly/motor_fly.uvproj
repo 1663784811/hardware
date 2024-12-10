@@ -441,6 +441,16 @@
               <FileType>5</FileType>
               <FilePath>.\ADC.h</FilePath>
             </File>
+            <File>
+              <FileName>compare.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\compare.c</FilePath>
+            </File>
+            <File>
+              <FileName>compare.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\compare.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
