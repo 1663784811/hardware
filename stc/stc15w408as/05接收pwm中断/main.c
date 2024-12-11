@@ -85,7 +85,7 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 	 pwmSpeed ++;
 	}
 	
-	// 计数超时
+	// 计数超时 ( 200ms 内没有pwm重置 )
 	if(pwmCycle >= 1600){
 	  pwmCycle = 0;
 		pwmSpeed = 0;
@@ -161,8 +161,9 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_Value     = 0;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
-  
-	
+  // 以上计算公式：    时钟源 / 12分频 / 256 ( 8位溢出 ) 
+	//                 24000000   ÷   12   ÷   256 =  7812.5 每秒钟中断/次
+	// 电机pwm信号一般为 50 HZ  即20ms      7812.5 ÷ 50 = 156.25   每20ms中断/次
 	
 	
 	
