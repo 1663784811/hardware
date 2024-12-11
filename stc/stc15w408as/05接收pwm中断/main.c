@@ -17,6 +17,12 @@
 /*************	本地变量声明	**************/
 
 
+// 
+volatile double pwmPercent = 0;
+// 运行速度（ 高电平大小 ）
+volatile u16 pwmSpeed = 0;
+// 速度周期 （ 总电平周期 ）
+volatile u16 pwmCycle = 65535;
 
 /*************	本地函数声明	**************/
 void	EXTI_config(void);
@@ -31,6 +37,7 @@ void	Timer_config(void);
 /**********************************************/
 void main(void)
 {
+	u8 aaa = 0;
 	EXTI_config();
 	UART_config();
 	Timer_config();
@@ -41,8 +48,9 @@ void main(void)
 	while (1)
 	{
 		delay_ms(1000);
-		PrintString1("test");
-		
+		TX1_write2buff( ((int)(pwmPercent * 10))%100/10 + '0');
+		TX1_write2buff( ((int)( pwmPercent * 100 )) % 10 + '0');
+		PrintString1("\r\n");
 	}
 }
 
@@ -50,13 +58,17 @@ void main(void)
 *   通过定时器输入捕获功能来检测 PWM 信号
 */
 void External0_ISR(void) interrupt INT0_VECTOR {
-		PrintString1("===");	
     if (IT0) {
-			PrintString1("up");
+			//计算占空比
+			if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed ){
+			   pwmPercent = pwmSpeed / pwmCycle;
+			}
+			//
+			pwmCycle = 0;
+			pwmSpeed = 0;
 			// 切换为下降沿触发
 			IT0 = 0;
-    } else {
-			PrintString1("down");			
+    } else {	
 			// 切换为上升沿触发
 			IT0 = 1;
     }
@@ -68,8 +80,22 @@ void External0_ISR(void) interrupt INT0_VECTOR {
 /********************* Timer0中断函数  产生pwm波 ********************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-  P11 = ~P11;
-			delay_ms(1000);
+	pwmCycle ++;
+	if(IT0 == 0){
+	 pwmSpeed ++;
+	}
+	
+	// 计数超时
+	if(pwmCycle >= 1600){
+	  pwmCycle = 0;
+		pwmSpeed = 0;
+		if(IT0 == 0){
+		   pwmPercent = 1;
+		}else {
+		   pwmPercent = 0;
+		}
+	}
+	
 }
 
 
@@ -77,7 +103,14 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 void timer1_int (void) interrupt TIMER1_VECTOR
 {
   P10 = ~P10;
-			delay_ms(1000);
+	delay_ms(1000);
+	
+	
+	
+	
+	
+	
+	
 }
 
 
@@ -120,15 +153,15 @@ void	EXTI_config(void)
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
-	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+	TIM_InitStructure.TIM_Mode      = TIM_8BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 32767;		//初值,
+	TIM_InitStructure.TIM_Value     = 0;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
-
+  
 	
 	
 	
