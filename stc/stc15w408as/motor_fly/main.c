@@ -16,6 +16,8 @@
 
 
 /*************	本地常量声明	**************/
+#define NULL  0
+
 
 /*************	本地变量声明	**************/
 // 相位状态
@@ -36,6 +38,8 @@ volatile u16 pwmSpeed = 0;
 // 速度周期 （ 总电平周期 ）
 volatile u16 pwmCycle = 65535;
 
+
+const unsigned char *runPwmPP = NULL;
 
 
 
@@ -106,7 +110,6 @@ void startMotor(void){
 					// 转到正常运行
 					isRun = 1;
 					
-					
 				}else{
 					// 继续加速
 				  Commutation();
@@ -152,6 +155,8 @@ void ZeroCrossDetected(void) {
 void Commutation(void) {
     switch (current_step) {
       case 1: 
+			  	
+			  *runPwmPP = P1;
 				//Drive(U, V);
 				break;
       case 2: 
@@ -190,15 +195,19 @@ void Commutation(void) {
 /********************* Timer0中断函数  产生pwm波 ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-	nowSpeed++;
-	if( nowSpeed < pwmSpeed ){
-		// 电平拉高
-	} else {
-		// 电平拉低
-	}
-	//== 重置周期
-	if(nowSpeed >= pwmCycle){
-		 nowSpeed  = 0;
+	if(*runPwmPP != NULL){
+		nowSpeed++;
+		if( nowSpeed < pwmSpeed ){
+			// 电平拉高
+			runPwmPP = 1;
+		} else {
+			// 电平拉低
+			runPwmPP = 0;
+		}
+		//== 重置周期
+		if(nowSpeed >= pwmCycle){
+			 nowSpeed  = 0;
+		}
 	}
 }
 
@@ -224,6 +233,7 @@ void ADC_int (void) interrupt ADC_VECTOR
 {
 	//清除标志
 	ADC_CONTR &= ~ADC_FLAG;
+	//启动ADC转换
 	adcRequest(ADC_P14);
 }
 
