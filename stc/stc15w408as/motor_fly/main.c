@@ -156,7 +156,7 @@ void Commutation(void) {
     switch (current_step) {
       case 1: 
 			  	
-			  *runPwmPP = P1;
+			  runPwmPP = &P1;
 				//Drive(U, V);
 				break;
       case 2: 
@@ -195,7 +195,6 @@ void Commutation(void) {
 /********************* Timer0中断函数  产生pwm波 ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-	if(*runPwmPP != NULL){
 		nowSpeed++;
 		if( nowSpeed < pwmSpeed ){
 			// 电平拉高
@@ -208,7 +207,6 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 		if(nowSpeed >= pwmCycle){
 			 nowSpeed  = 0;
 		}
-	}
 }
 
 /********************* Timer1中断函数  ********************/

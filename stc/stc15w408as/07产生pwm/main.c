@@ -7,6 +7,10 @@
 /*************	功能说明	**************
 
 
+产生50Hz 的方波 输出到 P11
+占空比为：50％
+计算公式： 
+
 ******************************************/
 
 
@@ -17,19 +21,13 @@
 /*************	本地变量声明	**************/
 
 
-// 
-volatile double pwmPercent = 0;
-// 运行速度（ 高电平大小 ）
-volatile u16 pwmSpeed = 0;
-// 速度周期 （ 总电平周期 ）
-volatile u16 pwmCycle = 65535;
 
 /*************	本地函数声明	**************/
 void	EXTI_config(void);
 //串口1初始化函数
 void	UART_config(void);
-// 
 void	Timer_config(void);
+void	GPIO_config(void);
 
 
 void printNumber(u16 number);
@@ -39,19 +37,17 @@ void printNumber(u16 number);
 /**********************************************/
 void main(void)
 {
-	u8 aaa = 0;
+	GPIO_config();
 	EXTI_config();
 	UART_config();
 	Timer_config();
 	EA = 1;             // 允许中断
-	PrintString1("init success");
 	// ==========================================
 	
 	while (1)
 	{
+		PrintString1("== \r\n");
 		delay_ms(1000);
-		printNumber(pwmPercent * 100);
-		PrintString1(" \r\n == \r\n");
 	}
 }
 
@@ -60,19 +56,6 @@ void main(void)
 */
 void External0_ISR(void) interrupt INT0_VECTOR {
     if (IT0) {
-			//计算占空比
-			if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed && pwmCycle > 100){
-			   pwmPercent = pwmSpeed / pwmCycle;
-				  printNumber(pwmPercent * 100);
-					PrintString1("\r\n pwmPercent = ");
-					printNumber(pwmCycle);
-					PrintString1("\r\n pwmSpeed = ");
-					printNumber(pwmSpeed);
-					PrintString1("\r\n");
-			}
-
-			pwmCycle = 0;
-			pwmSpeed = 0;
 			// 切换为下降沿触发
 			IT0 = 0;
     } else {	
@@ -90,37 +73,10 @@ void External0_ISR(void) interrupt INT0_VECTOR {
 /********************* Timer0中断函数  产生pwm波 ********************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-	pwmCycle ++;
-	if(IT0 == 0){
-	 pwmSpeed ++;
-	}
-	// 计数超时 ( 200ms 内没有pwm重置 )
-	if(pwmCycle >= 7812){
-	  pwmCycle = 0;
-		pwmSpeed = 0;
-		if(IT0 == 0){
-		   pwmPercent = 1;
-		}else {
-		   pwmPercent = 0;
-		}
-	}
-	
+		P11 = ~P11;
 }
 
 
-/********************* Timer1中断函数   ********************/
-void timer1_int (void) interrupt TIMER1_VECTOR
-{
-//  P10 = ~P10;
-//	delay_ms(1000);
-//	
-	
-	
-	
-	
-	
-	
-}
 
 
 
@@ -149,7 +105,6 @@ void	UART_config(void)
 void	EXTI_config(void)
 {
 	EXTI_InitTypeDef	EXTI_InitStructure;					//结构定义
-
 	EXTI_InitStructure.EXTI_Mode      = EXT_MODE_RiseFall;	//中断模式,  	EXT_MODE_RiseFall, EXT_MODE_Fall
 	EXTI_InitStructure.EXTI_Polity    = PolityHigh;			//中断优先级,   PolityLow,PolityHigh
 	EXTI_InitStructure.EXTI_Interrupt = ENABLE;				//中断允许,     ENABLE或DISABLE
@@ -162,30 +117,17 @@ void	EXTI_config(void)
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
-	TIM_InitStructure.TIM_Mode      = TIM_8BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 0;		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL - 20000;		//初值,  
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
-  // 以上计算公式：    时钟源 / 12分频 / 256 ( 8位溢出 ) 
-	//                 24000000   ÷   12   ÷   256 =  7812.5 每秒钟中断/次
-	// 电机pwm信号一般为 50 HZ  即20ms      7812.5 ÷ 50 = 156.25   每20ms中断/次
-	
-	
-	
-	
-	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
-	TIM_InitStructure.TIM_Polity    = PolityLow;
-	TIM_InitStructure.TIM_Interrupt = ENABLE;
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
-	TIM_InitStructure.TIM_ClkOut    = ENABLE;
-	TIM_InitStructure.TIM_Value     = 1;
-	TIM_InitStructure.TIM_Run       = ENABLE;
-	Timer_Inilize(Timer1,&TIM_InitStructure);
-
+  // 以上计算公式：    时钟源 / 12分频 / 65535 ( 16位溢出 ) 
+	//                 24000000   ÷   12   ÷   （65535 － 20000） =  100 每秒钟中断/次
+	// 电机pwm信号一般为 50 HZ  即20ms      100 ÷ 2 = 50Hz   每20ms中断/次
 }
 
 /************************************       IO口配置       *****************************************/
@@ -195,7 +137,6 @@ void	GPIO_config(void)
 	GPIO_InitStructure.Pin  = GPIO_Pin_0 | GPIO_Pin_1;	//指定要初始化的IO, GPIO_Pin_0 ~ GPIO_Pin_7, 或操作
 	GPIO_InitStructure.Mode = GPIO_OUT_PP;				//指定IO的输入或输出方式,GPIO_PullUp,GPIO_HighZ,GPIO_OUT_OD,GPIO_OUT_PP
 	GPIO_Inilize(GPIO_P1,&GPIO_InitStructure);			//初始化
-	
 }
 
 

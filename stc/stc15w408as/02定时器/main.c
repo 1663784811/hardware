@@ -53,7 +53,7 @@ void main(void)
 
 
 /********************* Timer0ÖÐ¶Ïº¯Êý   ************************/
-void timer0_int (void) interrupt 1
+void timer0_int (void) interrupt TIMER0_VECTOR
 {
   PrintString1("Timer0");
 	delay_ms(500);
