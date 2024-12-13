@@ -156,7 +156,6 @@ void Commutation(void) {
     switch (current_step) {
       case 1: 
 			  	
-			  runPwmPP = &P1;
 				//Drive(U, V);
 				break;
       case 2: 
