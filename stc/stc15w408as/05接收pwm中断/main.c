@@ -23,14 +23,12 @@ volatile double pwmPercent = 0;
 volatile u16 pwmSpeed = 0;
 // 速度周期 （ 总电平周期 ）
 volatile u16 pwmCycle = 65535;
-
 /*************	本地函数声明	**************/
 void	EXTI_config(void);
 //串口1初始化函数
 void	UART_config(void);
-// 
 void	Timer_config(void);
-
+void	GPIO_config(void);
 
 void printNumber(u16 number);
 /*************  外部函数和变量声明 *****************/
@@ -39,10 +37,11 @@ void printNumber(u16 number);
 /**********************************************/
 void main(void)
 {
-	u8 aaa = 0;
+	
 	EXTI_config();
 	UART_config();
 	Timer_config();
+	GPIO_config();
 	EA = 1;             // 允许中断
 	PrintString1("init success");
 	// ==========================================
@@ -50,7 +49,7 @@ void main(void)
 	while (1)
 	{
 		delay_ms(1000);
-		printNumber(pwmPercent * 100);
+		printNumber(pwmPercent * 10000);
 		PrintString1(" \r\n == \r\n");
 	}
 }
@@ -61,16 +60,9 @@ void main(void)
 void External0_ISR(void) interrupt INT0_VECTOR {
     if (IT0) {
 			//计算占空比
-			if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed && pwmCycle > 100){
-			   pwmPercent = pwmSpeed / pwmCycle;
-				  printNumber(pwmPercent * 100);
-					PrintString1("\r\n pwmPercent = ");
-					printNumber(pwmCycle);
-					PrintString1("\r\n pwmSpeed = ");
-					printNumber(pwmSpeed);
-					PrintString1("\r\n");
+			if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed){
+			   pwmPercent = (double)pwmSpeed / (double)pwmCycle;
 			}
-
 			pwmCycle = 0;
 			pwmSpeed = 0;
 			// 切换为下降沿触发
@@ -78,10 +70,7 @@ void External0_ISR(void) interrupt INT0_VECTOR {
     } else {	
 			// 切换为上升沿触发
 			IT0 = 1;
-
     }
-
-	
 }
 
 
@@ -94,35 +83,18 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 	if(IT0 == 0){
 	 pwmSpeed ++;
 	}
-	// 计数超时 ( 200ms 内没有pwm重置 )
-	if(pwmCycle >= 7812){
+	// 计数超时 ( 1s 内没有pwm重置 )
+	if(pwmCycle >= 2000){
 	  pwmCycle = 0;
 		pwmSpeed = 0;
 		if(IT0 == 0){
-		   pwmPercent = 1;
+		   //pwmPercent = 1;
 		}else {
 		   pwmPercent = 0;
 		}
 	}
 	
 }
-
-
-/********************* Timer1中断函数   ********************/
-void timer1_int (void) interrupt TIMER1_VECTOR
-{
-//  P10 = ~P10;
-//	delay_ms(1000);
-//	
-	
-	
-	
-	
-	
-	
-}
-
-
 
 
 
@@ -162,30 +134,18 @@ void	EXTI_config(void)
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
-	TIM_InitStructure.TIM_Mode      = TIM_8BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 0;		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL - 1000;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
-  // 以上计算公式：    时钟源 / 12分频 / 256 ( 8位溢出 ) 
-	//                 24000000   ÷   12   ÷   256 =  7812.5 每秒钟中断/次
-	// 电机pwm信号一般为 50 HZ  即20ms      7812.5 ÷ 50 = 156.25   每20ms中断/次
+  // 以上计算公式：    时钟源 / 12分频 / 65535 ( 16位溢出 ) 
+	//                 24000000   ÷   12   ÷   1000 =  2000 每秒钟中断/次
+	// 每50us 采样一次    
 	
-	
-	
-	
-	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
-	TIM_InitStructure.TIM_Polity    = PolityLow;
-	TIM_InitStructure.TIM_Interrupt = ENABLE;
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
-	TIM_InitStructure.TIM_ClkOut    = ENABLE;
-	TIM_InitStructure.TIM_Value     = 1;
-	TIM_InitStructure.TIM_Run       = ENABLE;
-	Timer_Inilize(Timer1,&TIM_InitStructure);
-
 }
 
 /************************************       IO口配置       *****************************************/
