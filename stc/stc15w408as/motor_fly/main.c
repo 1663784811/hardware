@@ -86,6 +86,9 @@ void main(void)
 		}else{
 			isRun = 0;
 		}
+		P12 = ~P12;
+		delay_ms(1000);
+		
 	}
 }
 
@@ -105,8 +108,9 @@ void startMotor(void){
 					
 				}else{
 					// 继续加速
+					delay_ms(1000);
 				  Commutation();
-				  delay_ms(20);
+				  delay_ms(1000);
 				}
 		}else{
 			// 停止
@@ -120,34 +124,102 @@ void startMotor(void){
 
 // 切换到下一步换相
 void Commutation(void) {
-    switch (current_step) {
-      case 1: 
-			  // U相高，V相低
-				ADC_select(1);
-
-				break;
-      case 2: 
-				// U相高，W相低
-
-				break;
-      case 3: 
-				// V相高，W相低
-			
-				break;
-      case 4: 
-
-				break;
-      case 5: 
-
-				break;
-      case 6: 
-
-				break;
-    }
 		current_step += 1;
 		if(current_step>6){
 			current_step = 1;
 		}
+    switch (current_step) {
+      case 1: 
+			  // U相高，V相低
+				P33 = 0;
+				P10 = 0;
+				P11 = 1;
+			  P37 = 1;
+			  P55 = 1;
+			  P36 = 0;
+				//ADC输入
+				ADC_select(ADC_P15);
+				ADC_start();
+				// 使能下降沿中断
+				CMP_RiseInterruptEn(DISABLE);
+			  CMP_FallInterruptEn(ENABLE);
+				break;
+      case 2: 
+				// U相高，W相低
+				P33 = 0;
+				P10 = 0;
+				P11 = 1;
+			  P37 = 0;
+			  P55 = 1;
+			  P36 = 1;
+				//ADC输入
+				ADC_select(ADC_P14);
+				ADC_start();
+				// 使能上升沿中断
+				CMP_RiseInterruptEn(ENABLE);
+			  CMP_FallInterruptEn(DISABLE);
+				break;
+      case 3: 
+				// V相高，W相低
+				P33 = 1;
+				P10 = 0;
+				P11 = 0;
+			  P37 = 0;
+			  P55 = 1;
+			  P36 = 1;
+				//ADC输入
+				ADC_select(ADC_P13);
+				ADC_start();
+				// 使能下降沿中断
+				CMP_RiseInterruptEn(DISABLE);
+			  CMP_FallInterruptEn(ENABLE);
+				break;
+      case 4: 
+				// V相高，U相低
+				P33 = 0;
+				P10 = 1;
+				P11 = 0;
+			  P37 = 0;
+			  P55 = 1;
+			  P36 = 1;
+				//ADC输入
+				ADC_select(ADC_P15);
+				ADC_start();
+				// 使能上升沿中断
+				CMP_RiseInterruptEn(ENABLE);
+			  CMP_FallInterruptEn(DISABLE);
+				break;
+      case 5: 
+				// W相高，U相低
+				P33 = 0;
+				P10 = 1;
+				P11 = 1;
+			  P37 = 1;
+			  P55 = 0;
+			  P36 = 0;
+				//ADC输入
+				ADC_select(ADC_P14);
+				ADC_start();
+				// 使能下降沿中断
+				CMP_RiseInterruptEn(DISABLE);
+			  CMP_FallInterruptEn(ENABLE);
+				break;
+      case 6: 
+				// W相高，V相低
+				P33 = 1;
+				P10 = 1;
+				P11 = 0;
+			  P37 = 1;
+			  P55 = 0;
+			  P36 = 0;
+				//ADC输入
+				ADC_select(ADC_P13);
+				ADC_start();
+				// 使能上升沿中断
+				CMP_RiseInterruptEn(ENABLE);
+			  CMP_FallInterruptEn(DISABLE);
+				break;
+    }
 }
 
 
@@ -205,19 +277,23 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 void timer2_int (void) interrupt TIMER2_VECTOR
 {
 	nowSpeed++;
-	// 
-	
 	if( nowSpeed <= pwmPercent){
-		
-		P11 = 1;
-	
+		if(current_step == 1 || current_step == 2){
+			P33 = 0;
+		}else if(current_step == 3 || current_step == 4){
+			P11 = 0;
+		}else if(current_step == 5 || current_step == 6){
+			P55 = 0;
+		}
 	}else{
-		P11 = 0;
-	
+		if(current_step == 1 || current_step == 2){
+			P33 = 1;
+		}else if(current_step == 3 || current_step == 4){
+			P11 = 1;
+		}else if(current_step == 5 || current_step == 6){
+			P55 = 1;
+		}
 	}
-	
-	
-	
 	// 重置
 	if(nowSpeed >= pwmPercentAll){
 		nowSpeed = 0;
@@ -231,7 +307,7 @@ void CMP_int (void) interrupt CMP_VECTOR
 {
 	//清除中断标志
 	CMPCR1 &= ~CMPIF;
-	Commutation();
+	// Commutation();
 }
 
 
@@ -268,7 +344,7 @@ void	EXTI_config(void)
 void	GPIO_config(void)
 {
 	GPIO_InitTypeDef	GPIO_InitStructure;				//结构定义
-	GPIO_InitStructure.Pin  = GPIO_Pin_0 | GPIO_Pin_1;	//指定要初始化的IO, GPIO_Pin_0 ~ GPIO_Pin_7, 或操作
+	GPIO_InitStructure.Pin  = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;	//指定要初始化的IO, GPIO_Pin_0 ~ GPIO_Pin_7, 或操作
 	GPIO_InitStructure.Mode = GPIO_OUT_PP;				//指定IO的输入或输出方式,GPIO_PullUp,GPIO_HighZ,GPIO_OUT_OD,GPIO_OUT_PP
 	GPIO_Inilize(GPIO_P1,&GPIO_InitStructure);			//初始化
 	
@@ -279,6 +355,18 @@ void	GPIO_config(void)
 	GPIO_InitStructure.Pin  = GPIO_Pin_5;
 	GPIO_InitStructure.Mode = GPIO_OUT_PP;
 	GPIO_Inilize(GPIO_P5,&GPIO_InitStructure);
+	
+	
+	// 电机PMos管关闭
+	P33 = 1;
+	P11 = 1;
+	P55 = 1;
+	
+	// 电机NMos管关闭
+	P10 = 0;
+	P37 = 0;
+	P36 = 0;
+	
 }
 
 
@@ -327,12 +415,12 @@ void	CMP_config(void)
 {
 	CMP_InitDefine CMP_InitStructure;					//结构定义
 	CMP_InitStructure.CMP_EN = ENABLE;					//允许比较器		ENABLE,DISABLE
-	CMP_InitStructure.CMP_RiseInterruptEn = ENABLE;		//允许上升沿中断	ENABLE,DISABLE
-	CMP_InitStructure.CMP_FallInterruptEn = ENABLE;		//允许下降沿中断	ENABLE,DISABLE
+	CMP_InitStructure.CMP_RiseInterruptEn = DISABLE;		//允许上升沿中断	ENABLE,DISABLE
+	CMP_InitStructure.CMP_FallInterruptEn = DISABLE;		//允许下降沿中断	ENABLE,DISABLE
 	CMP_InitStructure.CMP_P_Select     = CMP_P_ADCIS;		//比较器输入正极性选择, CMP_P_P55: 选择内部P5.5做正输入, CMP_P_ADCIS: 由ADCIS[2:0]所选择的ADC输入端做正输入.
 	CMP_InitStructure.CMP_N_Select     = CMP_N_P54;		//比较器输入负极性选择, CMP_N_BGv: 选择内部BandGap电压BGv做负输入, CMP_N_P54: 选择外部P5.4做输入.
-	CMP_InitStructure.CMP_OutptP12_En  = ENABLE;		//允许比较结果输出到P1.2,   ENABLE,DISABLE
-	CMP_InitStructure.CMP_InvCMPO      = ENABLE;		//比较器输出取反, 	ENABLE,DISABLE
+	CMP_InitStructure.CMP_OutptP12_En  = DISABLE;		//允许比较结果输出到P1.2,   ENABLE,DISABLE
+	CMP_InitStructure.CMP_InvCMPO      = DISABLE;		//比较器输出取反, 	ENABLE,DISABLE
 	CMP_InitStructure.CMP_100nsFilter  = DISABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
 	CMP_InitStructure.CMP_OutDelayDuty = 0;			//比较结果变化延时周期数, 0~63
   CMP_InitStructure.CMP_Polity	   = PolityLow;	//中断优先级,     PolityLow,PolityHigh

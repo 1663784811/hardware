@@ -64,14 +64,11 @@ void ADC_select(u8 channel){
 		if(channel > ADC_CH7){
 			return;
 		}else {
-			ADC_CONTR = (ADC_CONTR & 0xe0) | ADC_START | channel; 
+			ADC_CONTR = ADC_CONTR | channel; 
 		}
 
 }
 // ADC¿ªÊ¼×ª»»
 void ADC_start(void){
-
-
-	
-	
+		ADC_CONTR = ADC_CONTR | ADC_START;  
 }

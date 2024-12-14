@@ -23,3 +23,21 @@ void	CMP_Inilize(CMP_InitDefine *CMPx)
 //	u8	CMP_Polity;			//中断优先级,     PolityLow,PolityHigh
 }
 
+
+void CMP_RiseInterruptEn(u8 able){
+	//允许上升沿中断	ENABLE,DISABLE
+	if(able){ 
+		CMPCR1 |= PIE;
+	} else {
+		CMPCR1 &= ~PIE;
+	}
+}
+void CMP_FallInterruptEn(u8 able){
+	//允许下降沿中断	ENABLE,DISABLE
+	if(able){
+		CMPCR1 |= NIE;
+	}else{
+		CMPCR1 &= ~NIE;
+	}
+}
+
