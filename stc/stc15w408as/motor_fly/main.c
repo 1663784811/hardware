@@ -57,10 +57,8 @@ void GPIO_config(void);
 void ADC_config(void);
 void CMP_config(void);
 // ====
-void ZeroCrossDetected(void);
 void Commutation(void);
 void startMotor(void);
-void inputPwm(void);
 /*************  外部函数和变量声明 *****************/
 
 
@@ -77,11 +75,10 @@ void main(void)
 	// ==========================================
 	while (1)
 	{
+		// 判断占空比大于5
 		if(pwmPercent > runCondition ){
-				if(isRun){
-				// 判断占空比大于5
-				// 过零检测,转向
-				// ZeroCrossDetected();
+			if(isRun){
+				
 			} else {
 				// 当占空比大于5 开始启动
 				startMotor();
@@ -89,16 +86,7 @@ void main(void)
 		}else{
 			isRun = 0;
 		}
-
 	}
-}
-
-/**
-* 计算占空比
-*/
-void inputPwm(void)
-{
-
 }
 
 /**
@@ -130,43 +118,30 @@ void startMotor(void){
 
 
 
-
-
-/**
-* 检测到过零点 采用ADC 方法
-* return 是否可以换相 0 ，1
-*/
-void ZeroCrossDetected(void) {
-    //Delay(换相延迟时间);
-    //Commutation();
-	  // 判断哪个相位是空的
-	  if(0){
-		}
-		//return 0;
-}
-
-
 // 切换到下一步换相
 void Commutation(void) {
     switch (current_step) {
       case 1: 
-			  
-				//Drive(U, V);
+			  // U相高，V相低
+				ADC_select(1);
+
 				break;
       case 2: 
-				//Drive(V, W); 
+				// U相高，W相低
+
 				break;
       case 3: 
-				//Drive(W, U); 
+				// V相高，W相低
+			
 				break;
       case 4: 
-				//Drive(U, W); 
+
 				break;
       case 5: 
-				//Drive(W, V); 
+
 				break;
       case 6: 
-				//Drive(V, U); 
+
 				break;
     }
 		current_step += 1;
@@ -207,7 +182,7 @@ void External0_ISR(void) interrupt INT0_VECTOR {
 }
 
 
-/********************* Timer0中断函数  产生pwm波 ************************/
+/********************* Timer0中断函数************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
 	pwmCycle ++;
@@ -266,7 +241,7 @@ void ADC_int (void) interrupt ADC_VECTOR
 	//清除标志
 	ADC_CONTR &= ~ADC_FLAG;
 	//启动ADC转换
-	adcRequest(ADC_P14);
+	ADC_start();
 }
 
 

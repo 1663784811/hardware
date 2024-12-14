@@ -441,6 +441,16 @@
               <FileType>5</FileType>
               <FilePath>.\compare.h</FilePath>
             </File>
+            <File>
+              <FileName>Exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>Exti.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Exti.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
