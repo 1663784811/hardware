@@ -19,8 +19,12 @@
 
 
 /*************	本地变量声明	**************/
-
-
+// 高电平占空比
+u8 pwmPercent = 20;
+// 总占空比
+u8 pwmPercentAll = 100;
+// 当前的值
+u8 nowSpeed = 0;
 
 /*************	本地函数声明	**************/
 void	EXTI_config(void);
@@ -38,14 +42,14 @@ void main(void)
 {
 	GPIO_config();
 	EXTI_config();
-	UART_config();
+	// UART_config();
 	Timer_config();
 	EA = 1;             // 允许中断
 	// ==========================================
 	
 	while (1)
 	{
-		PrintString1("== \r\n");
+		// PrintString1("== \r\n");
 		delay_ms(1000);
 	}
 }
@@ -69,12 +73,29 @@ void External0_ISR(void) interrupt INT0_VECTOR {
 
 
 
-/********************* Timer0中断函数  产生pwm波 ********************/
-void timer0_int (void) interrupt TIMER0_VECTOR
-{
-		P11 = ~P11;
-}
+///********************* Timer0中断函数  产生pwm波 ********************/
+//void timer0_int (void) interrupt TIMER0_VECTOR
+//{
+//		P10 = ~P10;
+//}
 
+
+
+/********************* Timer1中断函数  ********************/
+void timer2_int (void) interrupt TIMER2_VECTOR
+{
+	nowSpeed++;
+	if( nowSpeed <= pwmPercent){
+		P11 = 1;
+	}else{
+		P11 = 0;
+	}
+	// 重置
+	if(nowSpeed >= pwmPercentAll){
+		nowSpeed = 0;
+	}
+	
+}
 
 
 
@@ -86,7 +107,7 @@ void	UART_config(void)
 {
 	COMx_InitDefine		COMx_InitStructure;					//结构定义
 	COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;		//模式,       UART_ShiftRight,UART_8bit_BRTx,UART_9bit,UART_9bit_BRTx
-	COMx_InitStructure.UART_BRT_Use   = BRT_Timer2;			//使用波特率,   BRT_Timer1, BRT_Timer2 (注意: 串口2固定使用BRT_Timer2)
+	COMx_InitStructure.UART_BRT_Use   = BRT_Timer1;			//使用波特率,   BRT_Timer1, BRT_Timer2 (注意: 串口2固定使用BRT_Timer2)
 	COMx_InitStructure.UART_BaudRate  = 115200ul;			//波特率, 一般 110 ~ 115200
 	COMx_InitStructure.UART_RxEnable  = ENABLE;				//接收允许,   ENABLE或DISABLE
 	COMx_InitStructure.BaudRateDouble = DISABLE;			//波特率加倍, ENABLE或DISABLE
@@ -116,17 +137,27 @@ void	EXTI_config(void)
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
-	TIM_InitStructure.TIM_Mode      = TIM_8BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+//	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+//	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
+//	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
+//	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+//	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
+//	TIM_InitStructure.TIM_Value     = 65536UL - 20000;		//初值,  
+//	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
+//	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
+// 以上计算公式：    时钟源 / 12分频 / 65535 ( 16位溢出 ) 
+//                 24000000   ÷   12   ÷   （256 － 20000） =  100 每秒钟中断/次
+// 电机pwm信号一般为 50 HZ  即20ms      100 ÷ 2 = 50Hz   每20ms中断/次
+	
+	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL - 20000;		//初值,  
+	TIM_InitStructure.TIM_Value     = 65536UL-80;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
-	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
-  // 以上计算公式：    时钟源 / 12分频 / 65535 ( 16位溢出 ) 
-	//                 24000000   ÷   12   ÷   （256 － 20000） =  100 每秒钟中断/次
-	// 电机pwm信号一般为 50 HZ  即20ms      100 ÷ 2 = 50Hz   每20ms中断/次
+	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
+	
 }
 
 /************************************       IO口配置       *****************************************/
