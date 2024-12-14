@@ -21,7 +21,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	if(GPIOx->Mode > GPIO_OUT_PP)	return 2;	//错误
 	if(GPIO == GPIO_P0)
 	{
-		P0=0; // 初始化为低电平
+		P0 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P0M1 &= ~GPIOx->Pin,	P0M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P0M1 |=  GPIOx->Pin,	P0M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P0M1 |=  GPIOx->Pin,	P0M0 |=  GPIOx->Pin;	 //开漏输出
@@ -29,7 +29,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	}
 	if(GPIO == GPIO_P1)
 	{
-		P1=0; // 初始化为低电平
+		P1 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P1M1 &= ~GPIOx->Pin,	P1M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P1M1 |=  GPIOx->Pin,	P1M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P1M1 |=  GPIOx->Pin,	P1M0 |=  GPIOx->Pin;	 //开漏输出
@@ -37,7 +37,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	}
 	if(GPIO == GPIO_P2)
 	{
-		 P2=0; // 初始化为低电平
+		 P2 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P2M1 &= ~GPIOx->Pin,	P2M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P2M1 |=  GPIOx->Pin,	P2M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P2M1 |=  GPIOx->Pin,	P2M0 |=  GPIOx->Pin;	 //开漏输出
@@ -45,7 +45,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	}
 	if(GPIO == GPIO_P3)
 	{
-		 P3=0; // 初始化为低电平
+		 P3 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P3M1 &= ~GPIOx->Pin,	P3M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P3M1 |=  GPIOx->Pin,	P3M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P3M1 |=  GPIOx->Pin,	P3M0 |=  GPIOx->Pin;	 //开漏输出
@@ -53,7 +53,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	}
 	if(GPIO == GPIO_P4)
 	{
-		 P4=0; // 初始化为低电平
+		 P4 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P4M1 &= ~GPIOx->Pin,	P4M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P4M1 |=  GPIOx->Pin,	P4M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P4M1 |=  GPIOx->Pin,	P4M0 |=  GPIOx->Pin;	 //开漏输出
@@ -61,7 +61,7 @@ u8	GPIO_Inilize(u8 GPIO, GPIO_InitTypeDef *GPIOx)
 	}
 	if(GPIO == GPIO_P5)
 	{
-		 P5=0; // 初始化为低电平
+		 P5 = ~GPIOx->Pin; // 初始化为低电平
 		if(GPIOx->Mode == GPIO_PullUp)		P5M1 &= ~GPIOx->Pin,	P5M0 &= ~GPIOx->Pin;	 //上拉准双向口
 		if(GPIOx->Mode == GPIO_HighZ)		P5M1 |=  GPIOx->Pin,	P5M0 &= ~GPIOx->Pin;	 //浮空输入
 		if(GPIOx->Mode == GPIO_OUT_OD)		P5M1 |=  GPIOx->Pin,	P5M0 |=  GPIOx->Pin;	 //开漏输出

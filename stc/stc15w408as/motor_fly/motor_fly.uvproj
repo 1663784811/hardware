@@ -402,16 +402,6 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>USART1.C</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\USART1.C</FilePath>
-            </File>
-            <File>
-              <FileName>USART1.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\USART1.h</FilePath>
-            </File>
-            <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\timer.c</FilePath>

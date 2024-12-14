@@ -1,7 +1,6 @@
 #include	"config.h"
 #include  "GPIO.h"
 #include  "timer.h"
-#include	"USART1.h"
 #include	"delay.h"
 #include  "Exti.h"
 #include  "ADC.h"
@@ -20,19 +19,27 @@
 
 
 /*************	本地变量声明	**************/
+// 高电平占空比
+volatile u8 pwmPercent = 0;
+// 总占空比
+volatile u8 pwmPercentAll = 100;
+// 当前的值
+volatile u8 nowSpeed = 0;
+
+
+
+
 // 相位状态
 volatile char current_step = 1;
 // 是否正常运行状态
 volatile char isRun = 0;
 
 // 运行条件  pwmSpeed 大于 runCondition 时开始运行
-volatile u16 runCondition = 10;
+volatile u16 runCondition = 5;
 
 
-// 当前速度
-volatile u16 nowSpeed = 0;
-// 当前pwm 速度引脚
-//unsigned char *runPin = null;
+
+
 // 运行速度（ 高电平大小 ）
 volatile u16 pwmSpeed = 0;
 // 速度周期 （ 总电平周期 ）
@@ -45,7 +52,6 @@ const unsigned char *runPwmPP = NULL;
 
 /*************	本地函数声明	**************/
 void EXTI_config(void);
-void UART_config(void);  //串口1初始化函数
 void Timer_config(void);
 void GPIO_config(void);
 void ADC_config(void);
@@ -62,29 +68,28 @@ void inputPwm(void);
 /**********************************************/
 void main(void)
 {
-	GPIO_config();      // gpio 配置
-	EXTI_config();      
-	Timer_config();     // 定时器配置
-	UART_config();
-	EA = 1;             // 允许中断
+	GPIO_config();
+	EXTI_config();
+	Timer_config();
+	ADC_config();
+	CMP_config();
+	EA = 1;
 	// ==========================================
 	while (1)
 	{
-		if(isRun){
-			// 判断占空比大于5
-			
-			if(0){
+		if(pwmPercent > runCondition ){
+				if(isRun){
+				// 判断占空比大于5
 				// 过零检测,转向
-				
-				ZeroCrossDetected();		
-			
-			}else{
-				isRun = 0;
+				// ZeroCrossDetected();
+			} else {
+				// 当占空比大于5 开始启动
+				startMotor();
 			}
-		} else {
-			// 当占空比大于5 开始启动
-			startMotor();
+		}else{
+			isRun = 0;
 		}
+
 	}
 }
 
@@ -93,7 +98,7 @@ void main(void)
 */
 void inputPwm(void)
 {
-  PrintString1("inputPwm");
+
 }
 
 /**
@@ -102,7 +107,7 @@ void inputPwm(void)
 void startMotor(void){
 	while(1){
 		// 判断占空比大于5
-    if(runCondition < pwmSpeed){
+    if(runCondition < pwmSpeed && isRun == 0){
 			  // 判断是否读取到过零检测
 			
 			
@@ -123,16 +128,6 @@ void startMotor(void){
 }
 
 
-/**
-*   通过定时器输入捕获功能来检测 PWM 信号
-*/
-void External0_ISR(void) interrupt INT0_VECTOR {
-//    if (measuring_high) {
-//        IT0 = 0;  // 切换为下降沿触发
-//    } else {
-//        IT0 = 1;  // 切换为上升沿触发
-//    }
-}
 
 
 
@@ -155,7 +150,7 @@ void ZeroCrossDetected(void) {
 void Commutation(void) {
     switch (current_step) {
       case 1: 
-			  	
+			  
 				//Drive(U, V);
 				break;
       case 2: 
@@ -191,27 +186,67 @@ void Commutation(void) {
 /************************************     中断     ***************************************/
 /************************************     中断     ***************************************/
 /************************************     中断     ***************************************/
+
+/**
+*   通过定时器输入捕获功能来检测 PWM 信号
+*/
+void External0_ISR(void) interrupt INT0_VECTOR {
+	if (IT0) {
+		//计算占空比
+		if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed){
+			 pwmPercent = (pwmSpeed * 100) / pwmCycle;
+		}
+		pwmCycle = 0;
+		pwmSpeed = 0;
+		// 切换为下降沿触发
+		IT0 = 0;
+	} else {	
+		// 切换为上升沿触发
+		IT0 = 1;
+	}
+}
+
+
 /********************* Timer0中断函数  产生pwm波 ************************/
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
-		nowSpeed++;
-		if( nowSpeed < pwmSpeed ){
-			// 电平拉高
-			runPwmPP = 1;
-		} else {
-			// 电平拉低
-			runPwmPP = 0;
+	pwmCycle ++;
+	if(IT0 == 0){
+	 pwmSpeed ++;
+	}
+	// 计数超时 ( 1s 内没有pwm重置 )
+	if(pwmCycle >= 2000){
+	  pwmCycle = 0;
+		pwmSpeed = 0;
+		if(IT0 == 0){
+		   //pwmPercent = 1;
+		}else {
+		   pwmPercent = 0;
 		}
-		//== 重置周期
-		if(nowSpeed >= pwmCycle){
-			 nowSpeed  = 0;
-		}
+	}
 }
 
 /********************* Timer1中断函数  ********************/
-void timer1_int (void) interrupt TIMER1_VECTOR
+void timer2_int (void) interrupt TIMER2_VECTOR
 {
-
+	nowSpeed++;
+	// 
+	
+	if( nowSpeed <= pwmPercent){
+		
+		P11 = 1;
+	
+	}else{
+		P11 = 0;
+	
+	}
+	
+	
+	
+	// 重置
+	if(nowSpeed >= pwmPercentAll){
+		nowSpeed = 0;
+	}
 }
 
 
@@ -253,22 +288,6 @@ void	EXTI_config(void)
 
 
 
-/******     串口1初始化函数     ******/
-void	UART_config(void)
-{
-	COMx_InitDefine		COMx_InitStructure;					//结构定义
-	COMx_InitStructure.UART_Mode      = UART_8bit_BRTx;		//模式,       UART_ShiftRight,UART_8bit_BRTx,UART_9bit,UART_9bit_BRTx
-	COMx_InitStructure.UART_BRT_Use   = BRT_Timer2;			//使用波特率,   BRT_Timer1, BRT_Timer2 (注意: 串口2固定使用BRT_Timer2)
-	COMx_InitStructure.UART_BaudRate  = 115200ul;			//波特率, 一般 110 ~ 115200
-	COMx_InitStructure.UART_RxEnable  = ENABLE;				//接收允许,   ENABLE或DISABLE
-	COMx_InitStructure.BaudRateDouble = DISABLE;			//波特率加倍, ENABLE或DISABLE
-	COMx_InitStructure.UART_Interrupt = ENABLE;				//中断允许,   ENABLE或DISABLE
-	COMx_InitStructure.UART_Polity    = PolityLow;			//中断优先级, PolityLow,PolityHigh
-	COMx_InitStructure.UART_P_SW      = UART1_SW_P30_P31;	//切换端口,   UART1_SW_P30_P31,UART1_SW_P36_P37,UART1_SW_P16_P17(必须使用内部时钟)
-	COMx_InitStructure.UART_RXD_TXD_Short = DISABLE;		//内部短路RXD与TXD, 做中继, ENABLE,DISABLE
-	USART_Configuration(USART1, &COMx_InitStructure);		//初始化串口1 USART1,USART2
-	PrintString1("STC15F2K60S2 UART1 Test Prgramme!\r\n");	//SUART1发送一个字符串
-}
 
 /******     IO口配置     **********/
 void	GPIO_config(void)
@@ -292,37 +311,32 @@ void	GPIO_config(void)
 void	Timer_config(void)
 {
 	TIM_InitTypeDef		TIM_InitStructure;					//结构定义
+	// ==== 0
 	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / 100000UL);		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL - 1000;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
 
+	// === 2
 	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / 1000);		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL-80;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
-	Timer_Inilize(Timer1,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
-
-//	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE. (注意: Timer2固定为16位自动重装, 中断固定为低优先级)
-//	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;		//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
-//	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-//	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / (50*12));		//初值
-//	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
-//	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
+	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
 }
 
 /********       ADC  ***************/
 void	ADC_config(void)
 {
 	ADC_InitTypeDef		ADC_InitStructure;				                    //结构定义
-	ADC_InitStructure.ADC_Px        = ADC_P14;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
+	ADC_InitStructure.ADC_Px        = ADC_P13 | ADC_P14 | ADC_P15;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
 	ADC_InitStructure.ADC_Speed     = ADC_360T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
 	ADC_InitStructure.ADC_Power     = ENABLE;			                  //ADC功率允许/关闭	ENABLE,DISABLE
 	ADC_InitStructure.ADC_AdjResult = ADC_RES_H8L2;		              //ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2
@@ -347,6 +361,5 @@ void	CMP_config(void)
 	CMP_InitStructure.CMP_100nsFilter  = DISABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
 	CMP_InitStructure.CMP_OutDelayDuty = 0;			//比较结果变化延时周期数, 0~63
   CMP_InitStructure.CMP_Polity	   = PolityLow;	//中断优先级,     PolityLow,PolityHigh
-	CMP_Inilize(&CMP_InitStructure);				//初始化Timer2	  Timer0,Timer1,Timer2
+	CMP_Inilize(&CMP_InitStructure);
 }
-
