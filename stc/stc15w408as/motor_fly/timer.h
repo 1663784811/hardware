@@ -32,4 +32,6 @@ typedef struct
 
 u8	Timer_Inilize(u8 TIM, TIM_InitTypeDef *TIMx);
 
+void openTimer(u8 TIM, u8 able);
+
 #endif

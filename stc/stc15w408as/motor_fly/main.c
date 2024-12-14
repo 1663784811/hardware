@@ -15,7 +15,6 @@
 
 
 /*************	本地常量声明	**************/
-#define NULL  0
 
 
 /*************	本地变量声明	**************/
@@ -25,8 +24,6 @@ volatile u8 pwmPercent = 0;
 volatile u8 pwmPercentAll = 100;
 // 当前的值
 volatile u8 nowSpeed = 0;
-
-
 
 
 // 相位状态
@@ -43,11 +40,7 @@ volatile u16 runCondition = 5;
 // 运行速度（ 高电平大小 ）
 volatile u16 pwmSpeed = 0;
 // 速度周期 （ 总电平周期 ）
-volatile u16 pwmCycle = 65535;
-
-
-const unsigned char *runPwmPP = NULL;
-
+volatile u16 pwmCycle = 0;
 
 
 /*************	本地函数声明	**************/
@@ -124,11 +117,12 @@ void startMotor(void){
 
 // 切换到下一步换相
 void Commutation(void) {
+		// 关闭定时器2
+	  openTimer(Timer2, DISABLE);
 		current_step += 1;
-		if(current_step>6){
-			current_step = 1;
-		}
-    switch (current_step) {
+		if(current_step>6){current_step = 1;}
+    
+		switch (current_step) {
       case 1: 
 			  // U相高，V相低
 				P33 = 0;
@@ -220,6 +214,8 @@ void Commutation(void) {
 			  CMP_FallInterruptEn(DISABLE);
 				break;
     }
+		// 开启定时器2
+		openTimer(Timer2, ENABLE);
 }
 
 
