@@ -52,6 +52,7 @@ void CMP_config(void);
 // ====
 void Commutation(void);
 void startMotor(void);
+void stopMotor(void);
 /*************  外部函数和变量声明 *****************/
 
 
@@ -79,9 +80,7 @@ void main(void)
 		}else{
 			isRun = 0;
 		}
-		P12 = ~P12;
 		delay_ms(1000);
-		
 	}
 }
 
@@ -93,17 +92,14 @@ void startMotor(void){
 		// 判断占空比大于5
     if(runCondition < pwmSpeed && isRun == 0){
 			  // 判断是否读取到过零检测
-			
-			
 			  if(0){
 					// 转到正常运行
 					isRun = 1;
 					
 				}else{
 					// 继续加速
-					delay_ms(1000);
-				  Commutation();
-				  delay_ms(1000);
+					Commutation();
+					delay_ms(10);
 				}
 		}else{
 			// 停止
@@ -118,10 +114,8 @@ void startMotor(void){
 // 切换到下一步换相
 void Commutation(void) {
 		// 关闭定时器2
-	  openTimer(Timer2, DISABLE);
 		current_step += 1;
 		if(current_step>6){current_step = 1;}
-    
 		switch (current_step) {
       case 1: 
 			  // U相高，V相低
@@ -214,8 +208,23 @@ void Commutation(void) {
 			  CMP_FallInterruptEn(DISABLE);
 				break;
     }
-		// 开启定时器2
-		openTimer(Timer2, ENABLE);
+}
+
+
+void stopMotor(void)
+{
+	isRun = 0;
+	pwmPercent = 0;
+	// 电机PMos管关闭
+	P33 = 1;
+	P11 = 1;
+	P55 = 1;
+	// 电机NMos管关闭
+	P10 = 1;
+	P37 = 0;
+	P36 = 0;
+	
+	P12 = 0;
 }
 
 
@@ -261,11 +270,7 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 	if(pwmCycle >= 2000){
 	  pwmCycle = 0;
 		pwmSpeed = 0;
-		if(IT0 == 0){
-		   //pwmPercent = 1;
-		}else {
-		   pwmPercent = 0;
-		}
+	  stopMotor();
 	}
 }
 
@@ -290,6 +295,7 @@ void timer2_int (void) interrupt TIMER2_VECTOR
 			P55 = 1;
 		}
 	}
+	P12 = ~P12;
 	// 重置
 	if(nowSpeed >= pwmPercentAll){
 		nowSpeed = 0;
@@ -387,7 +393,7 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
 	TIM_InitStructure.TIM_Value     = 65536UL-80;		//初值,
-	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
+	TIM_InitStructure.TIM_Run       = DISABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
 }
 

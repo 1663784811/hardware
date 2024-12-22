@@ -99,3 +99,33 @@ u8	Timer_Inilize(u8 TIM, TIM_InitTypeDef *TIMx)
 	}
 	return 2;	//错误
 }
+
+
+
+
+
+void openTimer(u8 TIM, u8 able){
+	if(TIM == Timer0)
+	{
+		if(able){
+				TR0 = 1;	//开始运行
+		}else{
+				TR0 = 0;		//停止计数
+		}	
+	} else if(TIM == Timer1)
+	{
+		if(able){
+				TR1 = 1;	//开始运行
+		} else {
+				TR1 = 0;		//停止计数
+		}
+	} else if(TIM == Timer2)		//Timer2,固定为16位自动重装, 中断无优先级
+	{
+		if(able){
+		  AUXR |=  (1<<4);	
+		}else{
+			AUXR &= ~(1<<4);	//停止计数
+		}
+	}
+}
+

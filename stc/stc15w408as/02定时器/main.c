@@ -56,22 +56,16 @@ void main(void)
 void timer0_int (void) interrupt TIMER0_VECTOR
 {
   PrintString1("Timer0");
-	delay_ms(500);
-	P11 = ~P11;
+
 }
 
-/********************* Timer1中断函数  产生pwm波 ********************/
-void timer1_int (void) interrupt TIMER1_VECTOR
-{
-	//
-	// 	PrintString1("Timer1");
-  P11 =  1;
-}
 
 /********************* Timer2中断函数  ************************/
 void timer2_int (void) interrupt TIMER2_VECTOR
 {
-	 	PrintString1("Timer2");
+	PrintString1("Timer2");
+  delay_ms(500);
+	P11 = ~P11;
 }
 
 
@@ -129,21 +123,15 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
 
-	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;
-	TIM_InitStructure.TIM_Polity    = PolityLow;
-	TIM_InitStructure.TIM_Interrupt = ENABLE;
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;
-	TIM_InitStructure.TIM_ClkOut    = ENABLE;
-	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / 1000);
-	TIM_InitStructure.TIM_Run       = ENABLE;
-	Timer_Inilize(Timer1,&TIM_InitStructure);
-
-//	TIM_InitStructure.TIM_Interrupt = ENABLE;
-//	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;
-//	TIM_InitStructure.TIM_ClkOut    = ENABLE;
-//	TIM_InitStructure.TIM_Value     = 65536UL - (MAIN_Fosc / (50*12));
-//	TIM_InitStructure.TIM_Run       = ENABLE;
-//	Timer_Inilize(Timer2,&TIM_InitStructure);
+	// === 2
+	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
+	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
+	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
+	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
+	TIM_InitStructure.TIM_Value     = 65536UL-80;		//初值,
+	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
+	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
 }
 
 
