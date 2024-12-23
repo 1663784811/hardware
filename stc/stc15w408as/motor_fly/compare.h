@@ -42,10 +42,11 @@ typedef struct
 void	CMP_Inilize(CMP_InitDefine *CMPx);
 
 
-// 上升沿中断
-void CMP_RiseInterruptEn(u8 able);
-// 下降沿中断
-void CMP_FallInterruptEn(u8 able);
+
+/**
+	true比较上升沿， false 下降沿
+*/
+void CMP_HL(u8 able);
 
 
 #endif

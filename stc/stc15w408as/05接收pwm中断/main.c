@@ -18,7 +18,7 @@
 
 
 // 
-volatile double pwmPercent = 0;
+volatile u16 pwmPercent = 0;
 // 运行速度（ 高电平大小 ）
 volatile u16 pwmSpeed = 0;
 // 速度周期 （ 总电平周期 ）
@@ -48,9 +48,12 @@ void main(void)
 	
 	while (1)
 	{
-		delay_ms(1000);
-		printNumber(pwmPercent * 10000);
-		PrintString1(" \r\n == \r\n");
+		delay_ms(100);
+		printNumber(pwmPercent);
+		PrintString1("\r\n");
+		if(pwmPercent<10){
+				PrintString1("  out \r\n");
+		}	
 	}
 }
 
@@ -61,7 +64,7 @@ void External0_ISR(void) interrupt INT0_VECTOR {
     if (IT0) {
 			//计算占空比
 			if(pwmSpeed > 0 && pwmCycle >0 && pwmCycle >= pwmSpeed){
-			   pwmPercent = (double)pwmSpeed / (double)pwmCycle;
+			   pwmPercent = ( pwmSpeed * 256 ) / pwmCycle;
 			}
 			pwmCycle = 0;
 			pwmSpeed = 0;
@@ -139,7 +142,7 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
 	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源,     TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL - 1000;		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL - 200;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer0,&TIM_InitStructure);				//初始化Timer0	  Timer0,Timer1,Timer2
   // 以上计算公式：    时钟源 / 12分频 / 65535 ( 16位溢出 ) 

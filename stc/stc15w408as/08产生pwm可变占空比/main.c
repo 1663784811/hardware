@@ -40,17 +40,27 @@ void printNumber(u16 number);
 /**********************************************/
 void main(void)
 {
+	int aa = 0;
 	GPIO_config();
 	EXTI_config();
 	// UART_config();
 	Timer_config();
 	EA = 1;             // 允许中断
 	// ==========================================
-	
 	while (1)
 	{
-		// PrintString1("== \r\n");
-		delay_ms(1000);
+		if(aa){
+			pwmPercent ++;
+			if(pwmPercent>=100){
+				aa = 0;
+			}
+		}else{
+			pwmPercent --;
+			if(pwmPercent<=0){
+				aa = 1;
+			}
+		}
+		delay_ms(500);
 	}
 }
 
@@ -152,9 +162,9 @@ void	Timer_config(void)
 	TIM_InitStructure.TIM_Mode      = TIM_16BitAutoReload;	//指定工作模式,   TIM_16BitAutoReload,TIM_16Bit,TIM_8BitAutoReload,TIM_16BitAutoReloadNoMask
 	TIM_InitStructure.TIM_Polity    = PolityLow;			//指定中断优先级, PolityHigh,PolityLow
 	TIM_InitStructure.TIM_Interrupt = ENABLE;				//中断是否允许,   ENABLE或DISABLE
-	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_1T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
+	TIM_InitStructure.TIM_ClkSource = TIM_CLOCK_12T;			//指定时钟源, TIM_CLOCK_1T,TIM_CLOCK_12T,TIM_CLOCK_Ext
 	TIM_InitStructure.TIM_ClkOut    = ENABLE;				//是否输出高速脉冲, ENABLE或DISABLE
-	TIM_InitStructure.TIM_Value     = 65536UL-80;		//初值,
+	TIM_InitStructure.TIM_Value     = 65536UL-400;		//初值,
 	TIM_InitStructure.TIM_Run       = ENABLE;				//是否初始化后启动定时器, ENABLE或DISABLE
 	Timer_Inilize(Timer2,&TIM_InitStructure);				//初始化Timer1	  Timer0,Timer1,Timer2
 	

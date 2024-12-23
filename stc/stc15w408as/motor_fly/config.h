@@ -14,9 +14,13 @@
 #include <STC15.H>
 #include <intrins.h>
 
+
 sfr	TH2  = 0xD6;
 sfr	TL2  = 0xD7;
 sfr PCON2   = 0x97;
+
+
+
 
 
 

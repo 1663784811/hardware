@@ -451,6 +451,26 @@
               <FileType>5</FileType>
               <FilePath>.\Exti.h</FilePath>
             </File>
+            <File>
+              <FileName>PCA.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\PCA.c</FilePath>
+            </File>
+            <File>
+              <FileName>PCA.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\PCA.h</FilePath>
+            </File>
+            <File>
+              <FileName>USART1.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USART1.C</FilePath>
+            </File>
+            <File>
+              <FileName>USART1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\USART1.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
