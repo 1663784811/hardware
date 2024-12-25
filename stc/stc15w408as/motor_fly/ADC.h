@@ -49,6 +49,6 @@ void	ADC_PowerControl(u8 pwr);
 // 选择 ADC
 void ADC_select(u8 channel);
 // ADC开始转换
-void ADC_start(void);
+void ADC_start(u8 able);
 
 #endif

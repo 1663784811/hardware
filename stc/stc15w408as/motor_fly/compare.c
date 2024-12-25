@@ -30,3 +30,14 @@ void CMP_HL(u8 able){
 		CMPCR1 = NIE | ( CMPCR1 & ~PIE );
 	}
 }
+
+
+
+
+void CMP_start(u8 able){
+	if(able){
+		CMPCR1 |= CMPEN;
+	}else{
+		CMPCR1 &= ~CMPEN;
+	}
+}
