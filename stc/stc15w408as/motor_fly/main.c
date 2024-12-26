@@ -96,22 +96,16 @@ void main(void)
 */
 void startMotor(void){
 	PrintString1("start !!!! ");
+	CMP_start(ENABLE);
 	while(1){
 		// 判断占空比大于5
     if(runCondition < pwmPercent && isRun == 0){
-			  // 判断是否读取到过零检测
-			  if(0){
-					// 转到正常运行
-					isRun = 1;
-					break;
-				}else{
-					// 继续加速
-					Commutation();
-					PrintString1("step = ");
-					printNumber(current_step);
-					PrintString1("\r\n");
-					delay_ms(2000);
-				}
+				// 继续加速
+				Commutation();
+				PrintString1("step = ");
+				printNumber(current_step);
+				PrintString1("\r\n");
+				delay_ms(2000);
 		}else{
 			// 停止
 			stopMotor();
@@ -119,8 +113,9 @@ void startMotor(void){
 		}
 	}
 	
-	CMP_start(ENABLE);
-	
+	if(runCondition < pwmPercent && isRun == 0){
+		CMP_start(DISABLE);
+	}
 }
 
 void stopMotor(void)
@@ -144,8 +139,9 @@ void stopMotor(void)
 // 切换到下一步换相
 void Commutation(void) {
 		runSpeed++;
-		current_step += 1;
-		if(current_step>6){current_step = 1;}
+		//current_step += 1;
+		//if(current_step>6){current_step = 1;}
+		current_step = 1;
 		switch (current_step) {
       case 1: 
 			  // U相高，V相低
@@ -155,11 +151,11 @@ void Commutation(void) {
 				UpdatePwm(PCA0, pwmPercent);
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, 0);
-				//ADC输入
+				//ADC输入 W
 				ADC_select(ADC_P15);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
-				CMP_HL(DISABLE);
+				CMP_HL(ENABLE);
 				break;
       case 2: 
 				// U相高，W相低
@@ -169,7 +165,7 @@ void Commutation(void) {
 				UpdatePwm(PCA0, pwmPercent);
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, 0);
-				//ADC输入
+				//ADC输入 V
 				ADC_select(ADC_P14);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
@@ -183,7 +179,7 @@ void Commutation(void) {
 				UpdatePwm(PCA0, 0);
 				UpdatePwm(PCA1, pwmPercent);
 				UpdatePwm(PCA2, 0);
-				//ADC输入
+				//ADC输入 U
 				ADC_select(ADC_P13);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
@@ -197,7 +193,7 @@ void Commutation(void) {
 				UpdatePwm(PCA0, 0);
 				UpdatePwm(PCA1, pwmPercent);
 				UpdatePwm(PCA2, 0);
-				//ADC输入
+				//ADC输入 W
 				ADC_select(ADC_P15);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
@@ -211,7 +207,7 @@ void Commutation(void) {
 				UpdatePwm(PCA0, 0);
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, pwmPercent);
-				//ADC输入
+				//ADC输入 V
 				ADC_select(ADC_P14);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
@@ -225,7 +221,7 @@ void Commutation(void) {
 				UpdatePwm(PCA0, 0);
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, pwmPercent);
-				//ADC输入
+				//ADC输入 U
 				ADC_select(ADC_P13);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
@@ -273,10 +269,11 @@ void timer0_int (void) interrupt TIMER0_VECTOR
 	}
 	// 计数超时 ( 1s 内没有pwm重置 )
 	if(pwmCycle >= 10000){
-		PrintString1("bb");
 		pwmCycle = 0;
 		pwmSpeed = 0;
-		stopMotor();
+		if(isRun){
+				stopMotor();
+		}
 	}
 }
 
@@ -298,6 +295,9 @@ void ADC_int (void) interrupt ADC_VECTOR
 {
 	//清除标志
 	ADC_CONTR &= ~ADC_FLAG;
+	// 读取ADC电压
+	
+	
 	//启动ADC转换
 	ADC_start(ENABLE);
 }

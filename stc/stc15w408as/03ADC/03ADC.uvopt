@@ -259,8 +259,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\Soft_UART.c</PathWithFileName>
-      <FilenameWithoutPath>Soft_UART.c</FilenameWithoutPath>
+      <PathWithFileName>.\USART1.C</PathWithFileName>
+      <FilenameWithoutPath>USART1.C</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -271,8 +271,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\soft_uart.h</PathWithFileName>
-      <FilenameWithoutPath>soft_uart.h</FilenameWithoutPath>
+      <PathWithFileName>.\USART1.h</PathWithFileName>
+      <FilenameWithoutPath>USART1.h</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

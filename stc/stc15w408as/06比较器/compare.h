@@ -39,6 +39,13 @@ typedef struct
 
 } CMP_InitDefine; 
 
+
+
+// 初始化
 void	CMP_Inilize(CMP_InitDefine *CMPx);
+// true比较上升沿， false 下降沿
+void CMP_HL(u8 able);
+// 开启CMP
+void CMP_start(u8 able);
 
 #endif

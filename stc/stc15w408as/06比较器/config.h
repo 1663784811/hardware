@@ -3,7 +3,6 @@
 
 
 /*********************************************************/
-
 //#define MAIN_Fosc		22118400L	//定义主时钟
 //#define MAIN_Fosc		12000000L	//定义主时钟
 //#define MAIN_Fosc		11059200L	//定义主时钟
@@ -19,6 +18,9 @@
 sfr	TH2  = 0xD6;
 sfr	TL2  = 0xD7;
 sfr PCON2   = 0x97;
+
+
+
 
 
 
@@ -68,7 +70,12 @@ typedef 	unsigned long	u32;
 
 
 
-/**********************************************************/
+
+
+
+
+
+
 #define NOP1()  _nop_()
 #define NOP2()  NOP1(),NOP1()
 #define NOP3()  NOP2(),NOP1()
@@ -110,6 +117,7 @@ typedef 	unsigned long	u32;
 #define NOP39() NOP38(),NOP1()
 #define NOP40() NOP39(),NOP1()
 #define NOP(N)  NOP##N()
+
 
 
 

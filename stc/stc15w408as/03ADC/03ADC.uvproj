@@ -412,14 +412,14 @@
               <FilePath>.\delay.h</FilePath>
             </File>
             <File>
-              <FileName>Soft_UART.c</FileName>
+              <FileName>USART1.C</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Soft_UART.c</FilePath>
+              <FilePath>.\USART1.C</FilePath>
             </File>
             <File>
-              <FileName>soft_uart.h</FileName>
+              <FileName>USART1.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\soft_uart.h</FilePath>
+              <FilePath>.\USART1.h</FilePath>
             </File>
           </Files>
         </Group>

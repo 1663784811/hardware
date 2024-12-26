@@ -23,3 +23,21 @@ void	CMP_Inilize(CMP_InitDefine *CMPx)
 //	u8	CMP_Polity;			//中断优先级,     PolityLow,PolityHigh
 }
 
+void CMP_HL(u8 able){
+	if(able){
+		CMPCR1 = PIE | ( CMPCR1 & ~NIE);
+	}else{
+		CMPCR1 = NIE | ( CMPCR1 & ~PIE );
+	}
+}
+
+
+
+
+void CMP_start(u8 able){
+	if(able){
+		CMPCR1 |= CMPEN;
+	}else{
+		CMPCR1 &= ~CMPEN;
+	}
+}

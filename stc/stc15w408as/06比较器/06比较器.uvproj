@@ -397,16 +397,6 @@
               <FilePath>.\ADC.h</FilePath>
             </File>
             <File>
-              <FileName>Soft_UART.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Soft_UART.c</FilePath>
-            </File>
-            <File>
-              <FileName>soft_uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\soft_uart.h</FilePath>
-            </File>
-            <File>
               <FileName>config.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\config.h</FilePath>
@@ -440,6 +430,16 @@
               <FileName>GPIO.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\GPIO.h</FilePath>
+            </File>
+            <File>
+              <FileName>USART1.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\USART1.C</FilePath>
+            </File>
+            <File>
+              <FileName>USART1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\USART1.h</FilePath>
             </File>
           </Files>
         </Group>

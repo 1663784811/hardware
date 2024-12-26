@@ -46,8 +46,9 @@ typedef struct
 void	ADC_Inilize(ADC_InitTypeDef *ADCx);
 // 开启ADC
 void	ADC_PowerControl(u8 pwr);
+// 选择 ADC
+void ADC_select(u8 channel);
+// ADC开始转换
+void ADC_start(u8 able);
 
-u16		Get_ADC10bitResult(u8 channel);	//channel = 0~7
-// ADC请求
-void adcRequest(u8 channel);
 #endif
