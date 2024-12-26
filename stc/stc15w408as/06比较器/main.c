@@ -38,16 +38,9 @@ void main(void)
 	ADC_start(ENABLE);
 	CMP_start(ENABLE);
 	// 使能下降沿中断
-
-	
-	
-
 	while (1)
 	{
 		PrintString1("test\r\n");
-		delay_ms(1000);
-//		ADC_start(ENABLE);
-    //CMP_start(ENABLE);
 		delay_ms(1000);
 	}
 }
@@ -76,8 +69,8 @@ void CMP_int (void) interrupt CMP_VECTOR
 {
 	//清除中断标志
 	CMPCR1 &= ~CMPIF;
-	CMP_start(DISABLE);
 	PrintString1("CMP= \r\n");
+
 }
 
 
@@ -103,7 +96,6 @@ void ADC_int (void) interrupt ADC_VECTOR
 	printNumber(adc);
 	PrintString1("\r\n");
 	//启动ADC转换
-	// ADC_start(ENABLE);
 }
 
 
