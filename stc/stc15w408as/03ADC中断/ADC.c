@@ -63,9 +63,9 @@ void	ADC_PowerControl(u8 pwr)
 //========================================================================
 // 函数: u16	Get_ADC10bitResult(u8 channel)
 // 描述: 查询法读一次ADC结果.
-// 参数: channel: 选择要转换的ADC.
+// 参数: channel: 选择要转换的ADC.     
 // 返回: 10位ADC结果.
-// 版本: V1.0, 2012-10-22
+// 版本: V1.0, 2012-10-22                  1  110 0010
 //========================================================================
 u16	Get_ADC10bitResult(u8 channel)	//channel = 0~7
 {
@@ -106,9 +106,9 @@ void ADC_select(u8 channel){
 // ADC开始转换
 void ADC_start(u8 able){
 	if(able){
-		ADC_CONTR |= ADC_START;  
+		ADC_CONTR |= 0x80 | ADC_START;  
 	}else{
-		ADC_CONTR &= ~ADC_START;  
+		ADC_CONTR &= ~( 0x80| ADC_START);  
 	}
 }
 

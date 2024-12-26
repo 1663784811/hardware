@@ -9,6 +9,32 @@
 
 ******************************************/
 
+#define ADC_POWER 0x80 // ADC电源控制位
+
+
+#define ADC_SPEEDLL 0x00 // 540个时钟
+
+
+#define ADC_SPEEDL 0x20  // 360个时钟
+#define ADC_SPEEDH 0x40  // 180个时钟
+#define ADC_SPEEDHH 0x60 // 90个时钟
+#define VCC 5000         // set ADC_REF_VCC
+
+typedef unsigned char BYTE;
+typedef unsigned int WORD;
+
+BYTE ch = 1;   // ADC通道号1，接LM35传感器信号输出引脚
+BYTE flag = 1; // 设置转换完成标志位
+BYTE H8bit = 0, L2bit = 0;
+WORD AD10bit = 0, temp = 0, dat = 0, dat1 = 0;
+unsigned long result = 0;
+
+
+
+u16 test = 0;
+
+
+
 /*************	本地常量声明	**************/
 
 
@@ -23,27 +49,27 @@ void	ADC_config(void);
 void printNumber(u16 number);
 /*************  外部函数和变量声明 *****************/
 
-
+void InitADC(void);
 
 
 /**********************************************/
 void main(void)
 {
-	u16 j;
+	EA = 1;
 	UART_config();
 	ADC_config();
-	EA = 1;
 	while (1)
 	{
-
-		PrintString1("aaa=");
-//		j = Get_ADC10bitResult(1);
-//		printNumber(j);
-		PrintString1("\r\n");
-		delay_ms(2000);
-		ADC_select(ADC_P11);
 		//启动ADC转换
-		ADC_start(ENABLE);
+		if(flag){
+			flag = 0;
+			ADC_select(ADC_CH1);
+			PrintString1("test= ");
+			printNumber(ADC_CONTR);
+			PrintString1("\r\n");
+			delay_ms(1000);
+			ADC_start(ENABLE);
+		}
 		delay_ms(2000);
 	}
 }
@@ -71,21 +97,21 @@ void main(void)
 void ADC_int (void) interrupt ADC_VECTOR
 {
 	u16	adc;
-	if(ADC_CONTR & ADC_FLAG){
-		ADC_CONTR &= ~ADC_FLAG;
-		if(PCON2 &  (1<<5)){
-			//10位AD结果的高2位放ADC_RES的低2位，低8位在ADC_RESL。
-			adc = (u16)(ADC_RES & 3);
-			adc = (adc << 8) | ADC_RESL;
-		} else {
-			//10位AD结果的高8位放ADC_RES，低2位在ADC_RESL的低2位。
-			adc = (u16)ADC_RES;
-			adc = (adc << 2) | (ADC_RESL & 3);
-		}
-		PrintString1("ADC = ");
-		printNumber(adc);
-		PrintString1("\r\n");
+	//清除ADC中断标志
+	ADC_CONTR &= ~ADC_FLAG;
+	if(PCON2 &  (1<<5)){
+		//10位AD结果的高2位放ADC_RES的低2位，低8位在ADC_RESL。
+		adc = (u16)(ADC_RES & 3);
+		adc = (adc << 8) | ADC_RESL;
+	} else {
+		//10位AD结果的高8位放ADC_RES，低2位在ADC_RESL的低2位。
+		adc = (u16)ADC_RES;
+		adc = (adc << 2) | (ADC_RESL & 3);
 	}
+	PrintString1("ADC= ");
+	printNumber(adc);
+	PrintString1("\r\n");
+	flag = 1;
 }
 
 
@@ -104,12 +130,11 @@ void ADC_int (void) interrupt ADC_VECTOR
 /************************************     初始化     ***************************************/
 
 
-
 void	ADC_config(void)
 {
 	ADC_InitTypeDef		ADC_InitStructure;				                    //结构定义
 	ADC_InitStructure.ADC_Px        = ADC_P10 | ADC_P11;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
-	ADC_InitStructure.ADC_Speed     = ADC_90T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
+	ADC_InitStructure.ADC_Speed     = ADC_360T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
 	ADC_InitStructure.ADC_Power     = ENABLE;			                  //ADC功率允许/关闭	ENABLE,DISABLE
 	ADC_InitStructure.ADC_AdjResult = ADC_RES_H2L8;		              //ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2
 	ADC_InitStructure.ADC_Polity    = PolityHigh;		                //优先级设置	PolityHigh,PolityLow
