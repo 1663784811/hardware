@@ -96,7 +96,7 @@ void main(void)
 */
 void startMotor(void){
 	PrintString1("start !!!! ");
-	CMP_start(ENABLE);
+	//CMP_start(ENABLE);
 	while(1){
 		// 判断占空比大于5
     if(runCondition < pwmPercent && isRun == 0){
@@ -114,7 +114,7 @@ void startMotor(void){
 	}
 	
 	if(runCondition < pwmPercent && isRun == 0){
-		CMP_start(DISABLE);
+		// CMP_start(DISABLE);
 	}
 }
 
@@ -152,10 +152,10 @@ void Commutation(void) {
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, 0);
 				//ADC输入 W
-				ADC_select(ADC_P15);
+				ADC_select(ADC_CH5);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
-				CMP_HL(ENABLE);
+				CMP_HL(DISABLE);
 				break;
       case 2: 
 				// U相高，W相低
@@ -166,7 +166,7 @@ void Commutation(void) {
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, 0);
 				//ADC输入 V
-				ADC_select(ADC_P14);
+				ADC_select(ADC_CH4);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
 				CMP_HL(ENABLE);
@@ -180,7 +180,7 @@ void Commutation(void) {
 				UpdatePwm(PCA1, pwmPercent);
 				UpdatePwm(PCA2, 0);
 				//ADC输入 U
-				ADC_select(ADC_P13);
+				ADC_select(ADC_CH3);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
 				CMP_HL(DISABLE);
@@ -194,7 +194,7 @@ void Commutation(void) {
 				UpdatePwm(PCA1, pwmPercent);
 				UpdatePwm(PCA2, 0);
 				//ADC输入 W
-				ADC_select(ADC_P15);
+				ADC_select(ADC_CH5);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
 				CMP_HL(ENABLE);
@@ -208,7 +208,7 @@ void Commutation(void) {
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, pwmPercent);
 				//ADC输入 V
-				ADC_select(ADC_P14);
+				ADC_select(ADC_CH4);
 				ADC_start(ENABLE);
 				// 使能下降沿中断
 				CMP_HL(DISABLE);
@@ -222,7 +222,7 @@ void Commutation(void) {
 				UpdatePwm(PCA1, 0);
 				UpdatePwm(PCA2, pwmPercent);
 				//ADC输入 U
-				ADC_select(ADC_P13);
+				ADC_select(ADC_CH3);
 				ADC_start(ENABLE);
 				// 使能上升沿中断
 				CMP_HL(ENABLE);
