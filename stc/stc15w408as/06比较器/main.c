@@ -25,6 +25,7 @@ void printNumber(u16 number);
 /******************** task A **************************/
 void main(void)
 {
+	int aa = 0;
 	EA = 1;
 	UART_config();
   ADC_config();
@@ -32,7 +33,7 @@ void main(void)
 
 	
 	// -----------------------------------------
-	ADC_select(ADC_CH1);
+	ADC_select(ADC_CH0);
 	CMP_HL(ENABLE);
 	// -----------------------------------------
 	ADC_start(ENABLE);
@@ -40,8 +41,21 @@ void main(void)
 	// 使能下降沿中断
 	while (1)
 	{
-		PrintString1("test\r\n");
-		delay_ms(1000);
+		
+		if(aa){
+			aa = 0;
+			PrintString1("ADC1\r\n");
+			ADC_select(ADC_CH1);
+			ADC_start(ENABLE);
+			CMP_start(ENABLE);
+		}else {
+			aa = 1;
+			PrintString1("ADC0\r\n");
+			ADC_select(ADC_CH0);
+			ADC_start(ENABLE);
+			CMP_start(ENABLE);
+		}
+		delay_ms(10000);
 	}
 }
 
@@ -70,7 +84,7 @@ void CMP_int (void) interrupt CMP_VECTOR
 	//清除中断标志
 	CMPCR1 &= ~CMPIF;
 	PrintString1("CMP= \r\n");
-
+	CMP_start(DISABLE);
 }
 
 
@@ -143,7 +157,7 @@ void	CMP_config(void)
 	CMP_InitStructure.CMP_InvCMPO      = DISABLE;		//比较器输出取反, 	ENABLE,DISABLE
 	CMP_InitStructure.CMP_100nsFilter  = ENABLE;		//内部0.1uF滤波,  	ENABLE,DISABLE
 	CMP_InitStructure.CMP_OutDelayDuty = 60;			//比较结果变化延时周期数, 0~63
-  CMP_InitStructure.CMP_Polity	   = PolityHigh;	//中断优先级,     PolityLow,PolityHigh
+  CMP_InitStructure.CMP_Polity	   = PolityLow;	//中断优先级,     PolityLow,PolityHigh
 	CMP_Inilize(&CMP_InitStructure);
 }
 
@@ -152,7 +166,7 @@ void	CMP_config(void)
 void	ADC_config(void)
 {
 	ADC_InitTypeDef		ADC_InitStructure;				                    //结构定义
-	ADC_InitStructure.ADC_Px        = ADC_P11 | ADC_P10 | ADC_P13 | ADC_P14 | ADC_P15;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
+	ADC_InitStructure.ADC_Px        = ADC_P11 | ADC_P10;	//设置要做ADC的IO,	ADC_P10 ~ ADC_P17(或操作),ADC_P1_All
 	ADC_InitStructure.ADC_Speed     = ADC_360T;			                //ADC速度			ADC_90T,ADC_180T,ADC_360T,ADC_540T
 	ADC_InitStructure.ADC_Power     = ENABLE;			                  //ADC功率允许/关闭	ENABLE,DISABLE
 	ADC_InitStructure.ADC_AdjResult = ADC_RES_H8L2;		              //ADC结果调整,	ADC_RES_H2L8,ADC_RES_H8L2

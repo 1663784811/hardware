@@ -25,7 +25,7 @@ u16		CCAP2_tmp,PCA_Timer2;
 
 ******************************************/
 
-const u16 biasPwm = 256;
+const u16 biasPwm = 128;
 u8 enablePwm0 = 0;
 u8 enablePwm1 = 0;
 u8 enablePwm2 = 0;
